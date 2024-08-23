@@ -8,7 +8,6 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.hibernate.JDBCException;
 import org.hr.employee.dto.EmployeeCreationDTO;
@@ -38,7 +37,7 @@ public class EmployeeResource {
 
   @Path("{id}")
   @GET
-  @PermitAll
+  @RolesAllowed({"admin", "user"})
   public RestResponse<EmployeeDTO> getEmployee(@RestPath(value="id") String id)
     throws HumanResourceException {
 
@@ -47,7 +46,7 @@ public class EmployeeResource {
   }
 
   @POST
-  @RolesAllowed({"admin", "user"})
+  @RolesAllowed({"admin"})
   public RestResponse<String> createEmployee(
     @RequestBody EmployeeCreationDTO employeeCreationDTO
   ) throws HumanResourceException {
@@ -62,7 +61,7 @@ public class EmployeeResource {
 
   @Path("{id}")
   @PUT
-  @RolesAllowed({"admin", "user"})
+  @RolesAllowed({"admin"})
   public RestResponse<String> updateEmployee(
     @RestPath(value = "id") String employeeId, @RequestBody EmployeeCreationDTO employeeWithoutIdDTO
   ) throws HumanResourceException {
@@ -77,6 +76,7 @@ public class EmployeeResource {
 
   @Path("{id}")
   @DELETE
+  @RolesAllowed({"admin"})
   public RestResponse<String> deleteEmployee(@RestPath(value = "id") String employeeId) throws HumanResourceException {
     this.employeeService.deleteEmployee(employeeId);
     return RestResponse.noContent();

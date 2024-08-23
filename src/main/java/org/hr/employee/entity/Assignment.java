@@ -1,6 +1,8 @@
 package org.hr.employee.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +29,7 @@ public class Assignment {
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private Long id;
 
+  @NotNull
   @PositiveOrZero
   private int numberOfHours;
 
@@ -37,6 +40,7 @@ public class Assignment {
   )
   private Employee employeeAssigned;
 
+  @NotNull
   @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinColumn(
     name = "project_belonging_id",

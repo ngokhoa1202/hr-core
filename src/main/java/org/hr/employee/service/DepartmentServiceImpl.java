@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.JDBCException;
 import org.hr.employee.dao.DepartmentDAO;
 import org.hr.employee.dto.DepartmentCreationDTO;
@@ -17,10 +16,13 @@ import org.hr.employee.entity.DepartmentLocation;
 import jakarta.validation.ConstraintViolationException;
 import org.hr.exception.*;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 @ApplicationScoped
 public class DepartmentServiceImpl implements DepartmentService {
 
-  private DepartmentDAO departmentDAO;
+  private final DepartmentDAO departmentDAO;
 
   @Inject
   public DepartmentServiceImpl(DepartmentDAO departmentDAO) {
@@ -29,7 +31,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
   @Override
   @Transactional
-  public DepartmentDTO saveDepartment(DepartmentCreationDTO departmentCreationDTO)
+  public DepartmentDTO createDepartment(DepartmentCreationDTO departmentCreationDTO)
     throws ConstraintViolationException, InvalidRequestBodyException, JDBCException {
 
     return this.departmentDAO.saveDepartment(
@@ -54,36 +56,37 @@ public class DepartmentServiceImpl implements DepartmentService {
 
   @Override
   @Transactional
-  public DepartmentLocationDTO saveDepartmentLocation(
+  public DepartmentLocationDTO createDepartmentLocation(
     @NonNull DepartmentLocationCreationDTO departmentLocationCreationDTO
   ) throws EntityNotFoundException, NoResultException {
 
-    Department existedDepartment = this.departmentDAO.findDepartmentById(departmentLocationCreationDTO.departmentId())
-      .orElseThrow(() -> new EntityNotFoundException(Department.class.getName()));
-
-    DepartmentLocation departmentLocation = departmentLocationCreationDTO.toDepartmentLocation()
-      .setDepartment(existedDepartment);
-
-    return this.departmentDAO.saveDepartmentLocation(departmentLocation)
+    return this.departmentDAO.saveDepartmentLocation(
+      departmentLocationCreationDTO.toDepartmentLocation()
+        .setDepartment(
+          this.departmentDAO.findDepartmentById(departmentLocationCreationDTO.departmentId())
+            .orElseThrow(() -> new EntityNotFoundException(Department.class.getName()))
+        )
+      )
       .orElseThrow(InvalidRequestBodyException::new)
       .toDepartmentLocationDTO();
   }
 
   @Override
   @Transactional
-  public DepartmentLocationDTO updatedDepartmentLocation(
+  public DepartmentLocationDTO updateDepartmentLocation(
     @NonNull Long id, @NonNull DepartmentLocationCreationDTO locationDTO
-  ) throws EntityNotFoundException, InvalidRequestBodyException  {
+  ) throws EntityNotFoundException, InvalidRequestBodyException {
 
     DepartmentLocation existedDepartmentLocation = this.departmentDAO.findDepartmentLocationById(id)
       .orElseThrow(() -> new EntityNotFoundException(DepartmentLocation.class.getName()));
-    Department existedDepartment = this.departmentDAO.findDepartmentById(locationDTO.departmentId())
-      .orElseThrow(() -> new EntityNotFoundException(Department.class.getName()));
+
     return this.departmentDAO.updateDepartmentLocation(
       locationDTO.toDepartmentLocation()
-        .setId(id).setDepartment(existedDepartment)
+        .setId(id).setDepartment(
+          this.departmentDAO.findDepartmentById(locationDTO.departmentId())
+            .orElseThrow(() -> new EntityNotFoundException(Department.class.getName()))
+        )
     ).orElseThrow(InvalidRequestBodyException::new).toDepartmentLocationDTO();
-
   }
 
 

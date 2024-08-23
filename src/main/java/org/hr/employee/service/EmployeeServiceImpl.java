@@ -14,25 +14,18 @@ import org.hr.employee.dto.*;
 import org.hr.employee.entity.*;
 import org.hr.exception.*;
 
-/* TODO: Rename to employee service */
-/* Keep code brief */
+
 @ApplicationScoped
 @Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
   private final EmployeeDAO employeeDAO;
   private final DepartmentDAO departmentDAO;
-  private final ProjectDAO projectDAO;
-  private final AssignmentDAO assignmentDAO;
 
   @Inject
-  public EmployeeServiceImpl(
-    EmployeeDAO employeeDAO, DepartmentDAO departmentDAO, ProjectDAO projectDAO, AssignmentDAO assignmentDAO) {
-
+  public EmployeeServiceImpl(EmployeeDAO employeeDAO, DepartmentDAO departmentDAO) {
     this.employeeDAO = employeeDAO;
     this.departmentDAO = departmentDAO;
-    this.projectDAO = projectDAO;
-    this.assignmentDAO = assignmentDAO;
   }
 
   @Override
@@ -45,7 +38,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   @Transactional
   public EmployeeDTO saveEmployee(EmployeeCreationDTO employeeCreationDTO)
-    throws EntityNotFoundException, ConstraintViolationException, JDBCException {
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
 
     Department department = this.departmentDAO.findDepartmentById(employeeCreationDTO.departmentId())
       .orElseThrow(() -> new EntityNotFoundException(Employee.class.getName()));
@@ -58,7 +51,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   @Transactional
   public EmployeeDTO updateEmployee(String employeeId, EmployeeCreationDTO employeeCreationDTO)
-    throws EntityNotFoundException, ConstraintViolationException, JDBCException {
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
 
     Department existedDepartment = this.departmentDAO.findDepartmentById(employeeCreationDTO.departmentId())
       .orElseThrow(() -> new EntityNotFoundException(Department.class.getName()));
@@ -72,7 +65,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Override
   @Transactional
-  public void deleteEmployee(String employeeId) throws InvalidRequestBodyException {
+  public void deleteEmployee(String employeeId) throws EntityNotFoundException {
     this.employeeDAO.deleteEmployeeById(employeeId)
       .filter((rowsDeleted) -> rowsDeleted == 1)
       .orElseThrow(() -> new EntityNotFoundException(Employee.class.getName()));

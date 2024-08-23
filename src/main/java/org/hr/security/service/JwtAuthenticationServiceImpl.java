@@ -9,9 +9,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationScoped
-public class JwtAuthenticationServiceImpl implements JwtAuthenticationService{
+public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
 
+  private static final long DURATION_IN_SECONDS = 30 * 300;
 
+  private long getJwtExpirationTime() {
+    return System.currentTimeMillis() / 1000 + DURATION_IN_SECONDS;
+  }
 
   public String generateJwtToken(Role role) {
     Set<String> userGroups = new HashSet<String>(
@@ -21,9 +25,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService{
     return Jwt.issuer("company")
       .subject("human-resource")
       .groups(userGroups)
-      .expiresAt(
-        System.currentTimeMillis() + 10*300*1000
-      )
+      .expiresAt(this.getJwtExpirationTime())
       .sign();
   }
 }

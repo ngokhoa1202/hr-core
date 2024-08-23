@@ -26,12 +26,16 @@ dependencies {
   implementation("io.quarkus:quarkus-smallrye-openapi")
   implementation("io.quarkus:quarkus-hibernate-orm")
   implementation("io.quarkus:quarkus-hibernate-validator")
+  implementation("org.mapstruct:mapstruct:1.6.0")
+
+  annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0")
   compileOnly("org.projectlombok:lombok:1.18.34")
   annotationProcessor("org.projectlombok:lombok:1.18.34")
 
   testImplementation("io.quarkus:quarkus-junit5")
   testImplementation("io.rest-assured:rest-assured")
   testImplementation("org.projectlombok:lombok:1.18.34")
+  testImplementation("io.quarkus:quarkus-junit5-mockito")
 }
 
 group = "org.hr"

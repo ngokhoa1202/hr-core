@@ -4,12 +4,13 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.TypedQuery;
 import jakarta.validation.ConstraintViolationException;
 import lombok.NonNull;
+import org.hibernate.JDBCException;
 import org.hr.security.entity.Role;
 import org.hr.security.entity.User;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Singleton
@@ -23,40 +24,44 @@ public class AuthenticationDAOImpl implements AuthenticationDAO {
   }
 
   @Override
-  public User saveUser(User user) throws ConstraintViolationException {
+  public Optional<User> saveUser(User user) throws ConstraintViolationException, JDBCException {
     this.entityManager.persist(user);
     this.entityManager.flush();
-    return user;
+    return Optional.of(user);
   }
 
   @Override
-  public Role saveRole(Role role) {
+  public Optional<Role> saveRole(Role role) throws ConstraintViolationException, JDBCException {
     this.entityManager.persist(role);
     this.entityManager.flush();
-    return role;
+    return Optional.of(role);
   }
 
   @Override
-  public User findUserById(UUID id) {
-    return this.entityManager.find(User.class, id);
+  public Optional<User> findUserById(UUID id) {
+    return Optional.ofNullable(this.entityManager.find(User.class, id));
   }
 
   @Override
-  public User findUserByUsername(String username) throws NoResultException {
-    TypedQuery<User> query = this.entityManager.createNamedQuery("findUserByUsername", User.class);
-    query.setParameter("username", username);
-    return query.getSingleResult();
+  public Optional<User> findUserByUsername(String username) throws NoResultException {
+    return Optional.of(
+      this.entityManager.createNamedQuery("findUserByUsername", User.class)
+        .setParameter("username", username)
+        .getSingleResult()
+    );
   }
 
   @Override
-  public Role findRoleByName(String name) throws NoResultException {
-    TypedQuery<Role> query = this.entityManager.createNamedQuery("findRoleByName", Role.class);
-    query.setParameter("name", name);
-    return query.getSingleResult();
+  public Optional<Role> findRoleByName(String name) throws NoResultException {
+    return Optional.of(
+      this.entityManager.createNamedQuery("findRoleByName", Role.class)
+        .setParameter("name", name)
+        .getSingleResult()
+    );
   }
 
   @Override
-  public Role findRoleById(Integer id) {
-    return this.entityManager.find(Role.class, id);
+  public Optional<Role> findRoleById(Integer id) {
+    return Optional.ofNullable(this.entityManager.find(Role.class, id));
   }
 }

@@ -1,13 +1,15 @@
 package org.hr.security.service;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
+import org.hibernate.JDBCException;
 import org.hr.exception.EntityNotFoundException;
 import org.hr.exception.InvalidRequestBodyException;
 import org.hr.exception.UnauthorizedException;
-import org.hr.exception.handler.ExceptionConverter;
 import org.hr.security.dao.AuthenticationDAO;
 import org.hr.security.dto.*;
 import org.hr.security.entity.Role;
@@ -18,11 +20,9 @@ import java.util.UUID;
 @Singleton
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-  private AuthenticationDAO authenticationDAO;
-  private ExceptionConverter handler;
-  private JwtAuthenticationService jwtAuthentication;
-  private PasswordBasedAuthenticationService passwordBasedAuthenticationService;
-
+  private final AuthenticationDAO authenticationDAO;
+  private final JwtAuthenticationService jwtAuthentication;
+  private final PasswordBasedAuthenticationService passwordBasedAuthenticationService;
 
   @Inject
   public AuthenticationServiceImpl(
@@ -34,79 +34,61 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     this.passwordBasedAuthenticationService = passwordBasedAuthenticationService;
   }
 
-  @Inject
-  public void setExceptionHandler(ExceptionConverter handler) {
-    this.handler = handler;
+
+  @Override
+  @Transactional
+  @PermitAll
+  public JwtDTO login(UserLoginDTO userLoginDTO)
+    throws EntityNotFoundException, UnauthorizedException, InvalidRequestBodyException {
+
+    User user = this.authenticationDAO.findUserByUsername(userLoginDTO.username())
+      .orElseThrow(InvalidRequestBodyException::new);
+    this.passwordBasedAuthenticationService.authenticate(
+      userLoginDTO.password(), user.getPassword()
+    ).filter((verified) -> verified).orElseThrow(UnauthorizedException::new);
+
+    return new JwtDTO(this.jwtAuthentication.generateJwtToken(user.getRole()));
   }
 
   @Override
   @Transactional
-  public JwtDTO login(UserLoginDTO userLoginDTO) throws EntityNotFoundException, UnauthorizedException, InvalidRequestBodyException {
-    User user = this.authenticationDAO.findUserByUsername(userLoginDTO.username());
-    if (user == null) {
-      throw new EntityNotFoundException("user");
-    }
-    boolean verified = this.passwordBasedAuthenticationService.authenticate(userLoginDTO.password(), user.getPassword());
-    if (! verified) {
-      throw new UnauthorizedException();
-    }
+  @RolesAllowed({"admin"})
+  public UserDTO saveUser(UserCreationDTO userCreationDTO)
+    throws EntityNotFoundException, InvalidRequestBodyException, ConstraintViolationException, JDBCException {
 
-    String jwt = this.jwtAuthentication.generateJwtToken(user.getRole());
-    return new JwtDTO(jwt);
+    return this.authenticationDAO.saveUser(
+      userCreationDTO.toUser()
+        .setRole(
+          this.authenticationDAO.findRoleByName(userCreationDTO.roleName())
+            .orElseThrow(InvalidRequestBodyException::new)
+        )
+    ).orElseThrow(InvalidRequestBodyException::new).toUserDTO();
   }
 
   @Override
   @Transactional
-  public UserDTO saveUser(UserCreationDTO userCreationDTO) throws EntityNotFoundException {
-    Role role = null;
-    try {
-      role = this.authenticationDAO.findRoleByName(userCreationDTO.roleName());
-    } catch (NoResultException ex) {
-      this.handler.convert(ex);
-    }
-
-    User user = this.passwordBasedAuthenticationService.encrypt(userCreationDTO.toUser().setRole(role));
-    User savedUser = null;
-    try {
-      savedUser = this.authenticationDAO.saveUser(user);
-    } catch (RuntimeException ex) {
-      this.handler.convert(ex);
-    }
-
-    return savedUser.toUserDTO();
-  }
-
-  @Override
-  @Transactional
+  @RolesAllowed({"admin"})
   public UserDTO getUser(UUID id) throws EntityNotFoundException {
-    User user = this.authenticationDAO.findUserById(id);
-    if (user == null) {
-      throw new EntityNotFoundException("user");
-    }
-    return user.toUserDTO();
+    return this.authenticationDAO.findUserById(id)
+      .orElseThrow(() -> new EntityNotFoundException(User.class.getName()))
+      .toUserDTO();
   }
 
   @Override
   @Transactional
-  public RoleDTO saveRole(RoleCreationDTO roleCreationDTO) {
-    Role role = roleCreationDTO.toRole();
-    Role savedRole = null;
-    try {
-      savedRole = this.authenticationDAO.saveRole(role);
-    } catch (RuntimeException ex) {
-      this.handler.convert(ex);
-    }
-
-    return savedRole.toRoleDTO();
+  @RolesAllowed({"admin"})
+  public RoleDTO saveRole(RoleCreationDTO roleCreationDTO) throws ConstraintViolationException, JDBCException {
+    return this.authenticationDAO.saveRole(roleCreationDTO.toRole())
+      .orElseThrow(InvalidRequestBodyException::new)
+      .toRoleDTO();
   }
 
   @Override
   @Transactional
+  @RolesAllowed({"admin", "user"})
   public RoleDTO getRole(Integer id) throws EntityNotFoundException {
-    Role role = this.authenticationDAO.findRoleById(id);
-    if (role == null) {
-      throw new EntityNotFoundException("role");
-    }
-    return role.toRoleDTO();
+    return this.authenticationDAO.findRoleById(id)
+      .orElseThrow(() -> new EntityNotFoundException(Role.class.getName()))
+      .toRoleDTO();
   }
 }

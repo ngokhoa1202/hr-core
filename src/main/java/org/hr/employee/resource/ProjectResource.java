@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.*;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.hibernate.JDBCException;
 import org.hr.employee.dto.AssignmentCreationDTO;
@@ -13,7 +12,6 @@ import org.hr.employee.dto.ProjectCreationDTO;
 import org.hr.employee.dto.ProjectDTO;
 import org.hr.employee.service.AssignmentService;
 import org.hr.employee.service.ProjectService;
-import org.hr.exception.InvalidRequestBodyException;
 import org.hr.exception.handler.ExceptionConverter;
 import org.hr.exception.mapper.HumanResourceException;
 import org.jboss.resteasy.reactive.RestPath;
@@ -41,8 +39,10 @@ public class ProjectResource {
   @Path("{id}")
   @GET
   public RestResponse<ProjectDTO> getProject(@RestPath(value = "id") Long id) throws HumanResourceException {
-    ProjectDTO projectDTO = this.projectService.getProject(id);
-    return RestResponse.ok(projectDTO);
+
+    return RestResponse.ok(
+      this.projectService.getProject(id)
+    );
   }
 
   @Path("{id}")
@@ -51,8 +51,12 @@ public class ProjectResource {
     @RestPath(value = "id") Long projectId, @RequestBody ProjectCreationDTO projectCreationDTO
   ) throws HumanResourceException {
     try {
-      ProjectDTO updatedProjectDTO = this.projectService.updateProject(projectId, projectCreationDTO);
-      return RestResponse.created(URI.create(updatedProjectDTO.id().toString()));
+      return RestResponse.created(
+        URI.create(
+          this.projectService.updateProject(projectId, projectCreationDTO)
+            .id().toString()
+        )
+      );
     } catch (JDBCException | ConstraintViolationException ex) {
      throw this.exceptionConverter.convert(ex);
     }
@@ -72,10 +76,13 @@ public class ProjectResource {
     throws HumanResourceException {
 
     try {
-      AssignmentDTO assignmentDTO = this.assignmentService.createAssignment(
-        assignmentCreationDTO.setProjectId(projectId)
+      return RestResponse.created(
+        URI.create(
+          this.assignmentService.createAssignment(
+            assignmentCreationDTO.setProjectId(projectId)
+          ).id().toString()
+        )
       );
-      return RestResponse.created(URI.create(assignmentDTO.id().toString()));
     } catch (JDBCException | ConstraintViolationException ex) {
       throw this.exceptionConverter.convert(ex);
     }
@@ -86,8 +93,9 @@ public class ProjectResource {
     @RestPath(value = "projectId") Long projectId, @RestPath(value = "assignmentId") Long assignmentId
   ) throws HumanResourceException {
 
-    AssignmentDTO assignmentDTO = this.assignmentService.getAssignment(assignmentId);
-    return RestResponse.ok(assignmentDTO);
+    return RestResponse.ok(
+      this.assignmentService.getAssignment(assignmentId)
+    );
   }
 
   @Path("{projectId}/assignments/{assignmentId}")
@@ -98,12 +106,25 @@ public class ProjectResource {
   ) throws HumanResourceException {
 
     try {
-      AssignmentDTO assignmentDTO = this.assignmentService.updateAssignment(
-        assignmentId, assignmentCreationDTO.setProjectId(projectId)
+      return RestResponse.created(
+        URI.create(
+          this.assignmentService.updateAssignment(
+            assignmentId, assignmentCreationDTO.setProjectId(projectId)
+          ).id().toString()
+        )
       );
-      return RestResponse.created(URI.create(assignmentDTO.id().toString()));
     } catch (JDBCException | ConstraintViolationException ex) {
       throw this.exceptionConverter.convert(ex);
     }
+  }
+
+  @Path("{projectId}/assignments/{assignmentId}")
+  @DELETE
+  public RestResponse<String> deleteAssignment(
+    @RestPath(value = "projectId") Long projectId, @RestPath(value = "assignmentId") Long assignmentId
+  ) throws HumanResourceException {
+
+    this.assignmentService.deleteAssignment(assignmentId);
+    return RestResponse.noContent();
   }
 }

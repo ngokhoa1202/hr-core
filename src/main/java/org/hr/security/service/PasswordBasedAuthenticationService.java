@@ -1,13 +1,11 @@
 package org.hr.security.service;
 
-import jakarta.inject.Singleton;
-import org.hr.security.entity.Role;
 import org.hr.security.entity.User;
 
-import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
 public interface PasswordBasedAuthenticationService {
 
   User encrypt(User user);
-  boolean authenticate(String plainPassword, String hashPassword);
+  Optional<Boolean> authenticate(String plainPassword, String hashPassword);
 }

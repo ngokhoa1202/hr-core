@@ -2,8 +2,12 @@ package org.hr.employee.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Qualifier;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 import lombok.NonNull;
+import org.hibernate.JDBCException;
 import org.hr.employee.dao.AssignmentDAO;
 import org.hr.employee.dao.EmployeeDAO;
 import org.hr.employee.dao.ProjectDAO;
@@ -16,6 +20,7 @@ import org.hr.exception.EntityNotFoundException;
 import org.hr.exception.InvalidRequestBodyException;
 
 @ApplicationScoped
+@Named(value = "assignmentService")
 public class AssignmentServiceImpl implements AssignmentService {
 
   private final EmployeeDAO employeeDAO;
@@ -24,7 +29,8 @@ public class AssignmentServiceImpl implements AssignmentService {
 
   @Inject
   public AssignmentServiceImpl(
-    @NonNull final AssignmentDAO assignmentDAO, @NonNull final EmployeeDAO employeeDAO,
+    @NonNull final AssignmentDAO assignmentDAO,
+    @NonNull final EmployeeDAO employeeDAO,
     @NonNull final ProjectDAO projectDAO) {
 
     this.assignmentDAO = assignmentDAO;
@@ -33,7 +39,7 @@ public class AssignmentServiceImpl implements AssignmentService {
   }
 
   @Override
-  public AssignmentDTO getAssignment(Long id) {
+  public AssignmentDTO getAssignment(Long id) throws EntityNotFoundException {
     return this.assignmentDAO.findAssignmentById(id)
       .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getName()))
       .toAssignmentDTO();
@@ -41,7 +47,8 @@ public class AssignmentServiceImpl implements AssignmentService {
 
   @Override
   @Transactional(value = Transactional.TxType.REQUIRED)
-  public AssignmentDTO createAssignment(AssignmentCreationDTO assignmentCreationDTO) {
+  public AssignmentDTO createAssignment(AssignmentCreationDTO assignmentCreationDTO)
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
 
     Employee employeeAssigned = this.employeeDAO.findEmployeeById(assignmentCreationDTO.getEmployeeId())
       .orElseThrow(() -> new EntityNotFoundException(Employee.class.getSimpleName()));
@@ -57,7 +64,9 @@ public class AssignmentServiceImpl implements AssignmentService {
 
   @Override
   @Transactional
-  public AssignmentDTO updateAssignment(Long id, AssignmentCreationDTO assignmentCreationDTO) {
+  public AssignmentDTO updateAssignment(Long id, AssignmentCreationDTO assignmentCreationDTO)
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
+
     Assignment existedAssignment = this.assignmentDAO.findAssignmentById(id)
       .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getSimpleName()));
 
@@ -78,6 +87,6 @@ public class AssignmentServiceImpl implements AssignmentService {
   public void deleteAssignment(Long id) throws EntityNotFoundException {
     this.assignmentDAO.deleteAssignment(id)
       .filter((rowsDeleted) -> rowsDeleted == 1)
-      .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getSimpleName()))
+      .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getSimpleName()));
   }
 }

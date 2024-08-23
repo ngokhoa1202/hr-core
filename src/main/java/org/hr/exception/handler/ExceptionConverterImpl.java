@@ -15,7 +15,6 @@ import java.lang.annotation.Annotation;
 import java.util.Locale;
 import java.util.Optional;
 
-import static org.hr.employee.service.EmployeeServiceImpl.*;
 import static org.hr.employee.utils.ConstraintMessage.*;
 import static org.postgresql.util.PSQLState.*;
 
@@ -34,8 +33,7 @@ public class ExceptionConverterImpl implements ExceptionConverter {
   }
 
   protected HumanResourceException convertHibernateException(
-    org.hibernate.exception.ConstraintViolationException ex
-  ) throws DuplicateFieldException {
+    org.hibernate.exception.ConstraintViolationException ex) {
 
     String sqlState = ex.getSQLState().toLowerCase(Locale.ROOT);
     String columnName = this.getFieldNameFrom(ex.getConstraintName()).get();

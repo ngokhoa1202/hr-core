@@ -62,4 +62,5 @@ public class DepartmentLocation {
   public DepartmentLocationDTO toDepartmentLocationDTO() {
     return new DepartmentLocationDTO(this.id, this.location, this.department.getId());
   }
+
 }

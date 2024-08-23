@@ -15,8 +15,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Builder
-@ToString(exclude = "userSet")
-@EqualsAndHashCode(exclude = "userSet")
 @NamedQueries({
   @NamedQuery(
     name = "findRoleByName",
