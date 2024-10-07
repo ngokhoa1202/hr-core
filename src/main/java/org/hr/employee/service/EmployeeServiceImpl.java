@@ -1,75 +1,128 @@
 package org.hr.employee.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.JDBCException;
-import org.hr.employee.dao.AssignmentDAO;
-import org.hr.employee.dao.DepartmentDAO;
-import org.hr.employee.dao.EmployeeDAO;
-import org.hr.employee.dao.ProjectDAO;
-import org.hr.employee.dto.*;
+import org.hr.employee.dao.DepartmentDao;
+import org.hr.employee.dao.EmployeeDao;
+import org.hr.employee.dto.department.DepartmentMapper;
+import org.hr.employee.dto.employee.EmployeeAssignmentStatisticsDto;
+import org.hr.employee.dto.employee.EmployeeMapper;
+import org.hr.employee.dto.employee.EmployeeResponseDto;
+import org.hr.employee.dto.employee.EmployeePayloadDto;
 import org.hr.employee.entity.*;
 import org.hr.exception.*;
+import org.hr.employee.dto.TotalNumberDTO;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 
 @ApplicationScoped
 @Transactional
+@RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
-  private final EmployeeDAO employeeDAO;
-  private final DepartmentDAO departmentDAO;
+  private final EmployeeDao employeeDAO;
+  private final DepartmentDao departmentDAO;
 
-  @Inject
-  public EmployeeServiceImpl(EmployeeDAO employeeDAO, DepartmentDAO departmentDAO) {
-    this.employeeDAO = employeeDAO;
-    this.departmentDAO = departmentDAO;
+  @Override
+  public EmployeeResponseDto getEmployee(UUID id) {
+
+    Employee employee = this.employeeDAO.findById(id)
+      .orElseThrow(() ->  new EntityNotFoundException("id", Employee.class.getSimpleName()));
+
+    return EmployeeMapper.INSTANCE.employeeToEmployeeResponseDto(employee);
   }
 
   @Override
-  public EmployeeDTO getEmployee(String id) {
-    return this.employeeDAO.findEmployeeById(id).orElseThrow(
-      () -> new EntityNotFoundException(Employee.class.getName())
-    ).toEmployeeDTO();
-  }
-
-  @Override
-  @Transactional
-  public EmployeeDTO saveEmployee(EmployeeCreationDTO employeeCreationDTO)
+  public EmployeeResponseDto createEmployee(@Valid EmployeePayloadDto employeePayloadDto)
     throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
 
-    Department department = this.departmentDAO.findDepartmentById(employeeCreationDTO.departmentId())
-      .orElseThrow(() -> new EntityNotFoundException(Employee.class.getName()));
+    Employee employee = EmployeeMapper.INSTANCE.employeePayloadDtoToEmployee(employeePayloadDto);
+    Department departmentById = this.departmentDAO.findById(employeePayloadDto.departmentPlainDto().id())
+      .orElseThrow(() -> new EntityNotFoundException("id", Department.class.getSimpleName()));
+    Department departmentByDto = employee.getDepartment();
+    DepartmentService.ensureDepartmentIntegrity(departmentById, departmentByDto);
 
-    return this.employeeDAO.saveEmployee(
-      employeeCreationDTO.toEmployee().setDepartment(department)
-    ).orElseThrow(InvalidRequestBodyException::new).toEmployeeDTO();
+    employee.setDepartment(departmentById);
+    departmentById.getEmployees().add(employee);
+
+    Employee employeeCreated = this.employeeDAO.create(employee)
+      .orElseThrow(InvalidRequestBodyException::new);
+    return EmployeeMapper.INSTANCE.employeeToEmployeeResponseDto(employeeCreated);
   }
 
   @Override
-  @Transactional
-  public EmployeeDTO updateEmployee(String employeeId, EmployeeCreationDTO employeeCreationDTO)
+  public EmployeeResponseDto updateEmployee(UUID id, @Valid EmployeePayloadDto employeePayloadDTO)
     throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
 
-    Department existedDepartment = this.departmentDAO.findDepartmentById(employeeCreationDTO.departmentId())
-      .orElseThrow(() -> new EntityNotFoundException(Department.class.getName()));
 
-    Employee existedEmployee = this.employeeDAO.findEmployeeById(employeeId)
-      .orElseThrow(() -> new EntityNotFoundException(Employee.class.getName()));
-    return this.employeeDAO.updateEmployee(
-      employeeCreationDTO.toEmployee().setDepartment(existedDepartment)
-    ).orElseThrow(InvalidRequestBodyException::new).toEmployeeDTO();
+    Department newDepartmentById = this.departmentDAO.findById(employeePayloadDTO.departmentPlainDto().id())
+      .orElseThrow(() -> new EntityNotFoundException("id", Department.class.getSimpleName()));
+    Department newDepartmentByDto = DepartmentMapper.INSTANCE.departmentPlainDtoToDepartment(employeePayloadDTO.departmentPlainDto());
+    DepartmentService.ensureDepartmentIntegrity(newDepartmentById, newDepartmentByDto);
+
+    Employee employee = this.employeeDAO.findById(id)
+      .orElseThrow(() -> new EntityNotFoundException("id", Employee.class.getSimpleName()));
+
+    employee.setFirstname(employeePayloadDTO.firstname());
+    employee.setLastname(employeePayloadDTO.lastname());
+    employee.setMiddlename(employee.getMiddlename());
+    employee.setDateOfBirth(employeePayloadDTO.dateOfBirth());
+    employee.setGender(GenderEnum.valueOf(employeePayloadDTO.gender().toUpperCase(Locale.ROOT)));
+    employee.setSalary(employeePayloadDTO.salary());
+
+    Department oldDepartment = employee.getDepartment();
+    oldDepartment.getEmployees().remove(employee);
+    employee.setDepartment(newDepartmentById);
+
+    Employee employeeUpdated = this.employeeDAO.update(employee)
+      .orElseThrow(InvalidRequestBodyException::new);
+    return EmployeeMapper.INSTANCE.employeeToEmployeeResponseDto(employeeUpdated);
   }
 
   @Override
-  @Transactional
-  public void deleteEmployee(String employeeId) throws EntityNotFoundException {
-    this.employeeDAO.deleteEmployeeById(employeeId)
-      .filter((rowsDeleted) -> rowsDeleted == 1)
-      .orElseThrow(() -> new EntityNotFoundException(Employee.class.getName()));
+  public void deleteEmployee(UUID id) throws EntityNotFoundException {
+    this.employeeDAO.deleteById(id);
   }
 
+
+  @Override
+  public List<EmployeeResponseDto> getEmployees(int startIndex, int limit) {
+    return this.employeeDAO.findAll(startIndex, limit)
+      .map(EmployeeMapper.INSTANCE::employeeToEmployeeResponseDto)
+      .toList();
+  }
+
+  @Override
+  public TotalNumberDTO getTotalNumberOfEmployees() {
+    return new TotalNumberDTO(this.employeeDAO.countTotal());
+  }
+
+  @Override
+  public List<EmployeeResponseDto> getEmployeesByEmployeeId(String employeeId, int startIndex, int limit) {
+    return this.employeeDAO.findByEmployeeIdPrefix(employeeId, startIndex, limit)
+      .map(EmployeeMapper.INSTANCE::employeeToEmployeeResponseDto)
+      .toList();
+  }
+
+  @Override
+  public List<EmployeeResponseDto> getEmployeesByName(String name, int startIndex, int limit) {
+    return this.employeeDAO.findByFirstnamePrefixOrLastnamePrefixOrMiddlePrefix(name.toLowerCase(Locale.ROOT), startIndex, limit)
+      .map(EmployeeMapper.INSTANCE::employeeToEmployeeResponseDto)
+      .toList();
+  }
+
+  @Override
+  public EmployeeAssignmentStatisticsDto getEmployeeWithAssignmentStatistics(UUID id) throws EntityNotFoundException {
+
+    return this.employeeDAO.findAssignmentStatisticsById(id)
+      .findAny().orElseThrow(() -> new EntityNotFoundException("id", Employee.class.getSimpleName()));
+  }
 }
 

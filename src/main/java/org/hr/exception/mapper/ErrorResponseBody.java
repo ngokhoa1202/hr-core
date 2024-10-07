@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 public record ErrorResponseBody(
   int status,
+  String field,
   String message,
   @JsonProperty(value = "time_stamp") LocalDateTime timeStamp) implements Serializable {
 

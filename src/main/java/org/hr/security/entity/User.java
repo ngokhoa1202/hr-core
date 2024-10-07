@@ -1,15 +1,12 @@
 package org.hr.security.entity;
 
-import io.quarkus.security.jpa.Password;
-import io.quarkus.security.jpa.Roles;
-import io.quarkus.security.jpa.UserDefinition;
-import io.quarkus.security.jpa.Username;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hr.security.dto.UserDTO;
+import org.hr.security.dto.user.UserPlainDto;
+import org.hr.security.dto.user.UserResponseDto;
 
 import java.util.UUID;
 
@@ -19,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 @NamedQueries({
   @NamedQuery(
     name = "findUserByUsername",
@@ -54,33 +52,23 @@ public class User {
   )
   private Role role;
 
-  public User setUsername(String username) {
-    this.username = username;
-    return this;
+
+  public UserPlainDto toUserDTO() {
+    return new UserPlainDto(
+      this.id,
+      this.username,
+      this.email,
+      this.password
+    );
   }
 
-  public User setPassword(String password) {
-    this.password = password;
-    return this;
-  }
-
-  public User setEmail(@Email String email) {
-    this.email = email;
-    return this;
-  }
-
-  public User setRole(Role role) {
-    this.role = role;
-    return this;
-  }
-
-  public UserDTO toUserDTO() {
-    return UserDTO.builder()
-      .id(this.id)
-      .username(this.username)
-      .password(this.password)
-      .email(this.email)
-      .roleName(this.role.getName())
-      .build();
+  public UserResponseDto toUserResponseDTO() {
+    return new UserResponseDto(
+      this.id,
+      this.username,
+      this.email,
+      this.password,
+      this.role.getName()
+    );
   }
 }

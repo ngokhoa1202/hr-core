@@ -1,11 +1,9 @@
 package org.hr.employee.service;
 
-import groovy.transform.ASTTest;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import org.hr.employee.dao.DepartmentDAO;
-import org.hr.employee.dto.DepartmentDTO;
+import org.hr.employee.dto.department.DepartmentResponseDto;
 import org.hr.employee.entity.Department;
 import org.hr.employee.scenario.DepartmentTestScenario;
 import org.hr.exception.EntityNotFoundException;
@@ -38,8 +36,8 @@ public class DepartmentServiceTest {
     Mockito.when(this.departmentDAO.findDepartmentById(id))
       .thenReturn(expectedDepartmentOptional);
 
-    DepartmentDTO expectedDepartmentDTO = this.scenario.mockDepartmentDTO();
-    DepartmentDTO departmentDTO = this.departmentService.getDepartment(id);
+    DepartmentResponseDto expectedDepartmentDTO = this.scenario.mockDepartmentResponseDto();
+    DepartmentResponseDto departmentDTO = this.departmentService.getDepartment(id);
 
     assertEquals(expectedDepartmentDTO, departmentDTO);
   }

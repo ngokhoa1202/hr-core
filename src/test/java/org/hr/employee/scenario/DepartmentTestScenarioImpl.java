@@ -2,17 +2,22 @@ package org.hr.employee.scenario;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.Validation;
-import org.hr.employee.dto.DepartmentCreationDTO;
-import org.hr.employee.dto.DepartmentDTO;
-import org.hr.employee.dto.DepartmentLocationCreationDTO;
-import org.hr.employee.dto.DepartmentLocationDTO;
+import org.hr.employee.dto.department.DepartmentPayloadDto;
+import org.hr.employee.dto.department.DepartmentResponseDto;
+import org.hr.employee.dto.department.location.DepartmentLocationPayloadDto;
+import org.hr.employee.dto.department.location.DepartmentLocationResponseDTO;
 import org.hr.employee.entity.Department;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @ApplicationScoped
 public class DepartmentTestScenarioImpl implements DepartmentTestScenario {
+
+  final Long DEPARTMENT_ID = 47L;
+  final String DEPARTMENT_NAME = "Marketing";
+  final LocalDateTime DEPARTMENT_START_DATE = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
 
   public org.hibernate.exception.ConstraintViolationException mockHibernateUniqueViolationException(String constraintName) {
     return new org.hibernate.exception.ConstraintViolationException(
@@ -22,24 +27,28 @@ public class DepartmentTestScenarioImpl implements DepartmentTestScenario {
     );
   }
 
-  public DepartmentDTO mockDepartmentDTO() {
-    return new DepartmentDTO(Long.valueOf(6L), "IT", Date.valueOf("2020-01-01"));
+  public DepartmentResponseDto mockDepartmentResponseDto() {
+    return new DepartmentResponseDto(
+      DEPARTMENT_ID,
+      DEPARTMENT_NAME,
+      DEPARTMENT_START_DATE
+    );
   }
 
   public String mockInvalidJwtToken() {
     return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwb2xpdGljcyIsIm5hbWUiOiJjb21tdW5pc3QiLCJpYXQiOjE1MTYyMzkwMjJ9.mjiaH4BE7TQ8rtpSzYPEcG9SxtuBQMAbVwGPg4zGyz4";
   }
 
-  public DepartmentCreationDTO mockDepartmentCreationDTO() {
-    return new DepartmentCreationDTO("IT", Date.valueOf("2020-01-01"));
+  public DepartmentPayloadDto mockDepartmentCreationDTO() {
+    return new DepartmentPayloadDto("IT", Date.valueOf("2020-01-01"));
   }
 
-  public DepartmentCreationDTO mockDepartmentCreationDTOWithInvalidName() {
-    return new DepartmentCreationDTO("IT2321", Date.valueOf("2020-01-01"));
+  public DepartmentPayloadDto mockDepartmentCreationDTOWithInvalidName() {
+    return new DepartmentPayloadDto("IT2321", Date.valueOf("2020-01-01"));
   }
 
-  public DepartmentLocationCreationDTO mockDepartmentLocationCreationDTOWithInvalidLocation() {
-    return new DepartmentLocationCreationDTO("", 6L);
+  public DepartmentLocationPayloadDto mockDepartmentLocationCreationDTOWithInvalidLocation() {
+    return new DepartmentLocationPayloadDto("", 6L);
   }
 
   public Long mockDepartmentId() {
@@ -50,12 +59,12 @@ public class DepartmentTestScenarioImpl implements DepartmentTestScenario {
     return 7L;
   }
 
-  public DepartmentLocationCreationDTO mockDepartmentLocationCreationDTO() {
-    return new DepartmentLocationCreationDTO("Tokyo", 6L);
+  public DepartmentLocationPayloadDto mockDepartmentLocationCreationDTO() {
+    return new DepartmentLocationPayloadDto("Tokyo", 6L);
   }
 
-  public DepartmentLocationDTO mockDepartmentLocationDTO() {
-    return new DepartmentLocationDTO(7L, "Tokyo", 6L);
+  public DepartmentLocationResponseDTO mockDepartmentLocationDTO() {
+    return new DepartmentLocationResponseDTO(7L, "Tokyo", 6L);
   }
 
   public jakarta.validation.ConstraintViolationException mockJakartaConstraintViolationException(Object o) {

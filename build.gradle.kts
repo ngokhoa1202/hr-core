@@ -18,6 +18,7 @@ dependencies {
   implementation("io.quarkus:quarkus-smallrye-jwt")
   implementation("io.quarkus:quarkus-smallrye-jwt-build")
   implementation("io.quarkus:quarkus-container-image-docker")
+  implementation("io.quarkus:quarkus-cache")
   implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
   implementation("io.quarkus:quarkus-rest")
   implementation("io.quarkus:quarkus-rest-jackson")
@@ -26,11 +27,16 @@ dependencies {
   implementation("io.quarkus:quarkus-smallrye-openapi")
   implementation("io.quarkus:quarkus-hibernate-orm")
   implementation("io.quarkus:quarkus-hibernate-validator")
-  implementation("org.mapstruct:mapstruct:1.6.0")
 
-  annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0")
+
   compileOnly("org.projectlombok:lombok:1.18.34")
   annotationProcessor("org.projectlombok:lombok:1.18.34")
+
+  implementation("org.mapstruct:mapstruct:1.6.0")
+  annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0")
+
+  implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 
   testImplementation("io.quarkus:quarkus-junit5")
   testImplementation("io.rest-assured:rest-assured")

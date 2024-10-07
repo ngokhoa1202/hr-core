@@ -7,6 +7,6 @@ import org.hr.exception.mapper.HumanResourceException;
 public class DuplicateFieldException extends HumanResourceException {
 
   public DuplicateFieldException(String fieldName) {
-    super(String.format("The %s field has already existed", fieldName), Response.Status.CONFLICT);
+    super(fieldName, String.format("The %s field has already existed", fieldName), Response.Status.CONFLICT);
   }
 }

@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hr.security.dto.RoleDTO;
+import org.hr.security.dto.role.RolePlainDto;
+import org.hr.security.dto.role.RoleResponseDto;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -31,25 +31,11 @@ public class Role {
   @NotBlank
   private String name;
 
-  @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-  private Set<User> userSet;
+  @OneToMany(
+    mappedBy = "role",
+    fetch = FetchType.LAZY,
+    cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+  )
+  private Set<User> users;
 
-  public Role setId(Integer id) {
-    this.id = id;
-    return this;
-  }
-
-  public Role setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  public Role setUserSet(HashSet<User> userSet) {
-    this.userSet = userSet;
-    return this;
-  }
-
-  public RoleDTO toRoleDTO() {
-    return RoleDTO.builder().id(this.id).name(this.name).build();
-  }
 }

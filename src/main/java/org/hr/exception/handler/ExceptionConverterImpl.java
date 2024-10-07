@@ -1,6 +1,7 @@
 package org.hr.exception.handler;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.persistence.NoResultException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotBlank;
@@ -74,11 +75,14 @@ public class ExceptionConverterImpl implements ExceptionConverter {
     ConstraintViolation<?> violation = ex.getConstraintViolations()
       .stream().findFirst()
       .get();
+    String property = violation.getPropertyPath().toString();
 
     return new InvalidFieldException(
+      property,
       this.getMessageFromConstraintViolation(violation)
     );
   }
+
 
   @Override
   public HumanResourceException convert(RuntimeException ex) {
@@ -90,6 +94,7 @@ public class ExceptionConverterImpl implements ExceptionConverter {
       case jakarta.validation.ConstraintViolationException exc -> {
         return this.convertJakartaValidationException(exc);
       }
+
 
       default -> {
         return new InvalidRequestBodyException(ex.getMessage());

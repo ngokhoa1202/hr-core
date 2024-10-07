@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 
 public class HumanResourceException extends WebApplicationException {
 
-  public HumanResourceException(final String message, final Response.Status status) {
+  public HumanResourceException(final String fieldName, final String message, final Response.Status status) {
 
     super(Response.status(status)
-      .entity(new ErrorResponseBody(status.getStatusCode(), message, LocalDateTime.now()))
+      .entity(new ErrorResponseBody(status.getStatusCode(), fieldName, message, LocalDateTime.now()))
       .type(MediaType.APPLICATION_JSON_TYPE)
       .build()
     );

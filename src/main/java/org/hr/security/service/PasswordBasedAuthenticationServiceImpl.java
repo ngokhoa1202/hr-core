@@ -1,8 +1,8 @@
 package org.hr.security.service;
 
 import io.quarkus.elytron.security.common.BcryptUtil;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.hr.exception.InvalidRequestBodyException;
 import org.hr.security.entity.User;
 
 import java.util.Optional;
@@ -18,6 +18,9 @@ public class PasswordBasedAuthenticationServiceImpl implements PasswordBasedAuth
 
   @Override
   public User encrypt(User user) {
-    return user.setPassword(BcryptUtil.bcryptHash(user.getPassword()));
+
+    String password = BcryptUtil.bcryptHash(user.getPassword());
+    user.setPassword(password);
+    return user;
   }
 }

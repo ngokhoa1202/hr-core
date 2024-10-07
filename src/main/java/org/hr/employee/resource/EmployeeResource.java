@@ -1,17 +1,20 @@
 package org.hr.employee.resource;
 
 import io.quarkus.security.Authenticated;
-import jakarta.annotation.security.PermitAll;
+import io.quarkus.security.jpa.Roles;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.hibernate.JDBCException;
-import org.hr.employee.dto.EmployeeCreationDTO;
-import org.hr.employee.dto.EmployeeDTO;
+import org.hr.employee.dto.employee.EmployeeAssignmentStatisticsDto;
+import org.hr.employee.dto.employee.EmployeePayloadDto;
+import org.hr.employee.dto.employee.EmployeeResponseDto;
+import org.hr.employee.dto.TotalNumberDTO;
 import org.hr.employee.service.EmployeeService;
 import org.hr.exception.handler.ExceptionConverter;
 import org.hr.exception.mapper.HumanResourceException;
@@ -19,41 +22,48 @@ import org.jboss.resteasy.reactive.RestPath;
 import org.jboss.resteasy.reactive.RestResponse;
 
 import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 @Path("employees")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+@RequiredArgsConstructor
 @Authenticated
 public class EmployeeResource {
 
   private final EmployeeService employeeService;
   private final ExceptionConverter exceptionConverter;
-
-  @Inject
-  public EmployeeResource(EmployeeService employeeService, ExceptionConverter exceptionConverter) {
-    this.employeeService = employeeService;
-    this.exceptionConverter = exceptionConverter;
-  }
+  private final String path = "api/employees/";
 
   @Path("{id}")
   @GET
   @RolesAllowed({"admin", "user"})
-  public RestResponse<EmployeeDTO> getEmployee(@RestPath(value="id") String id)
+  public RestResponse<EmployeeResponseDto> getEmployee(@RestPath(value="id") UUID id)
     throws HumanResourceException {
 
-    EmployeeDTO employeeDTO = this.employeeService.getEmployee(id);
+    EmployeeResponseDto employeeDTO = this.employeeService.getEmployee(id);
     return RestResponse.ok(employeeDTO);
+  }
+
+  @Path("pages/{startIndex}/limit/{limit}")
+  @GET
+  @RolesAllowed({"admin"})
+  public RestResponse<List<EmployeeResponseDto>> getEmployees(
+    @RestPath("startIndex") int startIndex, @RestPath("limit") int limit) {
+    List<EmployeeResponseDto> employeeDTOs = this.employeeService.getEmployees(startIndex, limit);
+    return RestResponse.ok(employeeDTOs);
   }
 
   @POST
   @RolesAllowed({"admin"})
   public RestResponse<String> createEmployee(
-    @RequestBody EmployeeCreationDTO employeeCreationDTO
+    @RequestBody EmployeePayloadDto employeePayloadDTO
   ) throws HumanResourceException {
 
     try {
-      EmployeeDTO employeeDTO = this.employeeService.saveEmployee(employeeCreationDTO);
-      return RestResponse.created(URI.create(employeeDTO.id()));
+      EmployeeResponseDto employeeDTO = this.employeeService.createEmployee(employeePayloadDTO);
+      return RestResponse.created(URI.create(this.path + employeeDTO.id().toString()));
     } catch (JDBCException | ConstraintViolationException ex) {
       throw this.exceptionConverter.convert(ex);
     }
@@ -63,12 +73,12 @@ public class EmployeeResource {
   @PUT
   @RolesAllowed({"admin"})
   public RestResponse<String> updateEmployee(
-    @RestPath(value = "id") String employeeId, @RequestBody EmployeeCreationDTO employeeWithoutIdDTO
+    @RestPath(value = "id") UUID id, @RequestBody EmployeePayloadDto employeeWithoutIdDTO
   ) throws HumanResourceException {
 
     try {
-      EmployeeDTO employee = this.employeeService.updateEmployee(employeeId, employeeWithoutIdDTO);
-      return RestResponse.created(URI.create(employee.id()));
+      EmployeeResponseDto employee = this.employeeService.updateEmployee(id, employeeWithoutIdDTO);
+      return RestResponse.created(URI.create(employee.id().toString()));
     } catch (JDBCException ex) {
       throw this.exceptionConverter.convert(ex);
     }
@@ -77,8 +87,48 @@ public class EmployeeResource {
   @Path("{id}")
   @DELETE
   @RolesAllowed({"admin"})
-  public RestResponse<String> deleteEmployee(@RestPath(value = "id") String employeeId) throws HumanResourceException {
-    this.employeeService.deleteEmployee(employeeId);
+  public RestResponse<String> deleteEmployee(@RestPath(value = "id") UUID id) throws HumanResourceException {
+    this.employeeService.deleteEmployee(id);
     return RestResponse.noContent();
+  }
+
+  @Path("total")
+  @GET
+  @RolesAllowed({"admin"})
+  public RestResponse<TotalNumberDTO> getTotalNumberOfEmployees() {
+    return RestResponse.ok(this.employeeService.getTotalNumberOfEmployees());
+  }
+
+  @Path("pages/{startIndex}/limit/{limit}/employee-ids/{employeeId}")
+  @GET
+  @RolesAllowed({"admin"})
+  public RestResponse<List<EmployeeResponseDto>> getEmployeesByEmployeeId(
+    @NotBlank @RestPath("employeeId") String employeeId, @RestPath("startIndex") int startIndex,
+    @RestPath("limit") int limit
+  ) throws HumanResourceException {
+
+    List<EmployeeResponseDto> employeeResponseDtos = this.employeeService.getEmployeesByEmployeeId(employeeId, startIndex, limit);
+    return RestResponse.ok(employeeResponseDtos);
+  }
+
+  @Path("pages/{startIndex}/limit/{limit}/names/{name}")
+  @GET
+  @RolesAllowed({"admin"})
+  public RestResponse<List<EmployeeResponseDto>> getEmployeesByName(
+    @RestPath("name") String name, @RestPath("startIndex") int startIndex, @RestPath("limit") int limit
+  ) throws HumanResourceException  {
+
+    List<EmployeeResponseDto> employeeResponseDtos = this.employeeService.getEmployeesByName(name, startIndex, limit);
+    return RestResponse.ok(employeeResponseDtos);
+  }
+
+  @Path("{id}/assignments/statistics")
+  @GET
+  @RolesAllowed({"admin"})
+  public RestResponse<EmployeeAssignmentStatisticsDto> getEmployeeWithAssignmentStatistics(@RestPath("id") UUID id)
+    throws HumanResourceException{
+
+    EmployeeAssignmentStatisticsDto employeeAssignmentStatisticsDto = this.employeeService.getEmployeeWithAssignmentStatistics(id);
+    return RestResponse.ok(employeeAssignmentStatisticsDto);
   }
 }

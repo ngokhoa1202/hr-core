@@ -1,5 +1,5 @@
 CREATE TABLE employee (
-  employeeid VARCHAR(9) PRIMARY KEY,
+  employee_id VARCHAR(9) PRIMARY KEY,
   date_of_birth DATE NOT NULL,
   first_name VARCHAR(20) NOT NULL,
   last_name VARCHAR(20) NOT NULL,

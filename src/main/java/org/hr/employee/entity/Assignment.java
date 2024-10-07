@@ -1,27 +1,19 @@
 package org.hr.employee.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hr.employee.dto.AssignmentDTO;
+import lombok.*;
+import org.hr.employee.dto.project.assignment.AssignmentPlainDto;
+import org.hr.employee.dto.project.assignment.AssignmentResponseDto;
 
 @Entity
 @Table(name = "assignment")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
-@NamedQueries({
-  @NamedQuery(
-    name = "deleteAssignmentById",
-    query = "DELETE Assignment a WHERE a.id = :id"
-  )
-})
 public class Assignment {
 
   @Id
@@ -31,9 +23,12 @@ public class Assignment {
 
   @NotNull
   @PositiveOrZero
-  private int numberOfHours;
+  private Integer numberOfHours;
 
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToOne(
+    fetch = FetchType.EAGER,
+    cascade = {CascadeType.PERSIST, CascadeType.MERGE }
+  )
   @JoinColumn(
     name = "employee_assigned_id",
     referencedColumnName = "employee_id"
@@ -41,34 +36,14 @@ public class Assignment {
   private Employee employeeAssigned;
 
   @NotNull
-  @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToOne(
+    fetch = FetchType.EAGER,
+    cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+  )
   @JoinColumn(
     name = "project_belonging_id",
     referencedColumnName = "project_id"
   )
   private Project projectBelonging;
 
-  public Assignment setId(Long id) {
-    this.id = id;
-    return this;
-  }
-
-  public Assignment setNumberOfHours(int numberOfHours) {
-    this.numberOfHours = numberOfHours;
-    return this;
-  }
-
-  public Assignment setEmployeeAssigned(Employee employeeAssigned) {
-    this.employeeAssigned = employeeAssigned;
-    return this;
-  }
-
-  public Assignment setProjectBelonging(Project projectBelonging) {
-    this.projectBelonging = projectBelonging;
-    return this;
-  }
-
-  public AssignmentDTO toAssignmentDTO() {
-    return new AssignmentDTO(this.id, this.numberOfHours, this.employeeAssigned.getId(), this.projectBelonging.getId());
-  }
 }

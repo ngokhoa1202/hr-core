@@ -10,10 +10,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpHeaders;
 import org.apache.http.protocol.HTTP;
-import org.hr.employee.dto.DepartmentCreationDTO;
-import org.hr.employee.dto.DepartmentDTO;
-import org.hr.employee.dto.DepartmentLocationCreationDTO;
-import org.hr.employee.dto.DepartmentLocationDTO;
+import org.hr.employee.dto.department.DepartmentPayloadDto;
+import org.hr.employee.dto.department.DepartmentResponseDto;
+import org.hr.employee.dto.department.location.DepartmentLocationPayloadDto;
+import org.hr.employee.dto.department.location.DepartmentLocationResponseDTO;
 import org.hr.employee.entity.Department;
 import org.hr.employee.entity.DepartmentLocation;
 import org.hr.employee.scenario.DepartmentTestScenario;
@@ -21,8 +21,8 @@ import org.hr.employee.service.DepartmentService;
 import org.hr.employee.utils.ConstraintMessage;
 import org.hr.exception.EntityNotFoundException;
 import org.hr.exception.mapper.ErrorResponseBody;
-import org.hr.security.dto.JwtDTO;
-import org.hr.security.dto.UserLoginDTO;
+import org.hr.security.dto.JwtDto;
+import org.hr.security.dto.user.UserLoginDto;
 import org.hr.security.resource.AuthenticationResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -59,12 +59,12 @@ public class DepartmentResourceTest {
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
       .body(
-        new UserLoginDTO("ngovuanhkhoa", "1234")
+        new UserLoginDto("ngovuanhkhoa", "1234")
       )
       .when().request(Method.POST, this.loginEndpoint)
       .then()
       .statusCode(Response.Status.OK.getStatusCode())
-      .extract().body().as(JwtDTO.class).token();
+      .extract().body().as(JwtDto.class).token();
   }
 
 
@@ -89,24 +89,24 @@ public class DepartmentResourceTest {
 
   @Test
   @Order(1)
-  public void GivenValidDepartmentId_WhenGettingDepartmentById_ReturnDepartmentDTO() {
+  public void GivenValidDepartmentId_WhenGettingDepartmentById_ReturnDepartmentResponseDTO() {
 
-    final DepartmentDTO expectedDepartmentDTO = this.scenario.mockDepartmentDTO();
+    final DepartmentResponseDto expectedDepartmentResponseDto = this.scenario.mockDepartmentResponseDto();
 
-    Mockito.when(this.departmentService.getDepartment(expectedDepartmentDTO.id()))
-      .thenReturn(expectedDepartmentDTO);
+    Mockito.when(this.departmentService.getDepartment(expectedDepartmentResponseDto.id()))
+      .thenReturn(expectedDepartmentResponseDto);
 
-    DepartmentDTO departmentDTO = given()
+    DepartmentResponseDto departmentDTO = given()
       .header(HTTP.CONTENT_TYPE, MediaType.APPLICATION_JSON)
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-      .pathParam("id", expectedDepartmentDTO.id())
+      .pathParam("id", expectedDepartmentResponseDto.id())
       .when().get("{id}")
       .then()
       .statusCode(Response.Status.OK.getStatusCode())
       .extract().body()
-      .as(DepartmentDTO.class);
+      .as(DepartmentResponseDto.class);
 
-    assertEquals(expectedDepartmentDTO, departmentDTO);
+    assertEquals(expectedDepartmentResponseDto, departmentDTO);
   }
 
   @Test
@@ -133,9 +133,9 @@ public class DepartmentResourceTest {
   @Order(3)
   public void GivenDepartmentNameAlreadyExisted_WhenCreatingDepartment_ReturnRequestConflict() {
 
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
 
-    Mockito.when(this.departmentService.createDepartment(departmentCreationDTO)).thenThrow(
+    Mockito.when(this.departmentService.createDepartment(departmentPayloadDTO)).thenThrow(
       this.scenario.mockHibernateUniqueViolationException("department_name_unique")
     );
 
@@ -143,7 +143,7 @@ public class DepartmentResourceTest {
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
       .auth().oauth2(this.jwt)
-      .body(departmentCreationDTO)
+      .body(departmentPayloadDTO)
       .when().post()
       .then()
       .statusCode(Response.Status.CONFLICT.getStatusCode())
@@ -155,12 +155,12 @@ public class DepartmentResourceTest {
   @Test
   @Order(4)
   public void GivenRequestLackingJwtToken_WhenCreatingDepartment_ReturnRequestUnauthorized() {
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
 
     given()
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-      .body(departmentCreationDTO)
+      .body(departmentPayloadDTO)
       .when().post()
       .then()
       .statusCode(Response.Status.UNAUTHORIZED.getStatusCode());
@@ -169,10 +169,10 @@ public class DepartmentResourceTest {
   @Test
   @Order(5)
   public void GivenValidDepartmentCreationDTO_WhenCreatingDepartment_ReturnDepartmentCreated() {
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
-    final DepartmentDTO departmentDTO = this.scenario.mockDepartmentDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentResponseDto departmentDTO = this.scenario.mockDepartmentResponseDto();
 
-    Mockito.when(this.departmentService.createDepartment(departmentCreationDTO))
+    Mockito.when(this.departmentService.createDepartment(departmentPayloadDTO))
       .thenReturn(departmentDTO);
 
     URI departmentURI = URI.create(
@@ -180,7 +180,7 @@ public class DepartmentResourceTest {
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
         .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
         .auth().oauth2(this.jwt)
-        .body(departmentCreationDTO)
+        .body(departmentPayloadDTO)
         .when().post()
         .then()
         .statusCode(Response.Status.CREATED.getStatusCode())
@@ -195,9 +195,9 @@ public class DepartmentResourceTest {
   @Test
   @Order(6)
   public void GivenInvalidDepartmentName_WhenCreatingDepartment_ReturnBadRequest() {
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
 
-    Mockito.when(this.departmentService.createDepartment(departmentCreationDTO)).thenThrow(
+    Mockito.when(this.departmentService.createDepartment(departmentPayloadDTO)).thenThrow(
       this.scenario.mockJakartaConstraintViolationException(
         this.scenario.mockDepartmentCreationDTOWithInvalidName().toDepartment()
       )
@@ -207,7 +207,7 @@ public class DepartmentResourceTest {
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
       .auth().oauth2(this.jwt)
-      .body(departmentCreationDTO)
+      .body(departmentPayloadDTO)
       .when().post()
       .then()
       .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
@@ -225,10 +225,10 @@ public class DepartmentResourceTest {
   @Order(7)
   public void GivenValidDepartmentDTO_WhenUpdatingDepartment_ReturnDepartmentCreated() {
     Long departmentId = this.scenario.mockDepartmentId();
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
-    final DepartmentDTO expectedDepartmentDTO = this.scenario.mockDepartmentDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentResponseDto expectedDepartmentDTO = this.scenario.mockDepartmentResponseDto();
 
-    Mockito.when(this.departmentService.updateDepartment(departmentId, departmentCreationDTO))
+    Mockito.when(this.departmentService.updateDepartment(departmentId, departmentPayloadDTO))
       .thenReturn(expectedDepartmentDTO);
 
     URI departmentURI = URI.create(
@@ -237,7 +237,7 @@ public class DepartmentResourceTest {
         .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
         .auth().oauth2(this.jwt)
         .pathParam("id", departmentId)
-        .body(departmentCreationDTO)
+        .body(departmentPayloadDTO)
         .when().put("{id}")
         .then()
         .statusCode(Response.Status.CREATED.getStatusCode())
@@ -251,9 +251,9 @@ public class DepartmentResourceTest {
   @Order(7)
   public void GivenNotFoundDepartmentId_WhenUpdatingDepartment_ReturnRequestNotFound() {
     final Long departmentId = this.scenario.mockDepartmentId();
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
 
-    Mockito.when(this.departmentService.updateDepartment(departmentId, departmentCreationDTO))
+    Mockito.when(this.departmentService.updateDepartment(departmentId, departmentPayloadDTO))
       .thenThrow(new EntityNotFoundException(Department.class.getName()));
 
     ErrorResponseBody responseBody = given()
@@ -261,7 +261,7 @@ public class DepartmentResourceTest {
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
       .auth().oauth2(this.jwt)
       .pathParam("id", departmentId)
-      .body(departmentCreationDTO)
+      .body(departmentPayloadDTO)
       .when().put("{id}")
       .then()
       .statusCode(Response.Status.NOT_FOUND.getStatusCode())
@@ -274,9 +274,9 @@ public class DepartmentResourceTest {
   @Order(8)
   public void GivenDepartmentNameExisted_WhenUpdatingDepartment_ReturnRequestConflict() {
     final Long departmentId = this.scenario.mockDepartmentId();
-    final DepartmentCreationDTO departmentCreationDTO = this.scenario.mockDepartmentCreationDTO();
+    final DepartmentPayloadDto departmentPayloadDTO = this.scenario.mockDepartmentCreationDTO();
 
-    Mockito.when(this.departmentService.updateDepartment(departmentId, departmentCreationDTO))
+    Mockito.when(this.departmentService.updateDepartment(departmentId, departmentPayloadDTO))
       .thenThrow(this.scenario.mockHibernateUniqueViolationException("department_name_unique"));
 
     ErrorResponseBody body = given()
@@ -284,7 +284,7 @@ public class DepartmentResourceTest {
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
       .auth().oauth2(this.jwt)
       .pathParam("id", departmentId)
-      .body(departmentCreationDTO)
+      .body(departmentPayloadDTO)
       .when().put("{id}")
       .then()
       .statusCode(Response.Status.CONFLICT.getStatusCode())
@@ -313,12 +313,12 @@ public class DepartmentResourceTest {
   @Order(8)
   public void GivenDepartmentLocationId_WhenGettingDepartmentLocationById_ReturnDepartmentLocationDTO() {
     final Long departmentLocationId = this.scenario.mockDepartmentLocationId();
-    final DepartmentLocationDTO expectedDepartmentLocationDTO = this.scenario.mockDepartmentLocationDTO();
+    final DepartmentLocationResponseDTO expectedDepartmentLocationDTO = this.scenario.mockDepartmentLocationDTO();
 
     Mockito.when(this.departmentService.getDepartmentLocation(departmentLocationId))
       .thenReturn(expectedDepartmentLocationDTO);
 
-    DepartmentLocationDTO departmentLocationDTO = given()
+    DepartmentLocationResponseDTO departmentLocationDTO = given()
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
       .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
       .pathParam("id", departmentLocationId)
@@ -326,7 +326,7 @@ public class DepartmentResourceTest {
       .then()
       .statusCode(Response.Status.OK.getStatusCode())
       .extract().body()
-      .as(DepartmentLocationDTO.class);
+      .as(DepartmentLocationResponseDTO.class);
 
     assertEquals(departmentLocationDTO, expectedDepartmentLocationDTO);
   }
@@ -354,10 +354,10 @@ public class DepartmentResourceTest {
   @Test
   @Order(10)
   public void GivenValidDepartmentLocationDTO_WhenCreatingDepartmentLocation_ReturnDepartmentLocationCreated() {
-    final DepartmentLocationDTO expectedLocationDTO = this.scenario.mockDepartmentLocationDTO();
-    final DepartmentLocationCreationDTO departmentLocationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationResponseDTO expectedLocationDTO = this.scenario.mockDepartmentLocationDTO();
+    final DepartmentLocationPayloadDto departmentLocationPayloadDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
-    Mockito.when(this.departmentService.createDepartmentLocation(departmentLocationCreationDTO))
+    Mockito.when(this.departmentService.createDepartmentLocation(departmentLocationPayloadDTO))
       .thenReturn(expectedLocationDTO);
 
     URI locationURI = URI.create(
@@ -365,7 +365,7 @@ public class DepartmentResourceTest {
         .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
         .auth().oauth2(this.jwt)
-        .body(departmentLocationCreationDTO)
+        .body(departmentLocationPayloadDTO)
         .when().post("locations")
         .then()
         .statusCode(Response.Status.CREATED.getStatusCode())
@@ -379,7 +379,7 @@ public class DepartmentResourceTest {
   @Test
   @Order(11)
   public void GivenDepartmentIdNotExisted_WhenCreatingDepartmentLocation_ReturnRequestNotFound() {
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
     Mockito.when(this.departmentService.createDepartmentLocation(locationCreationDTO))
       .thenThrow(new EntityNotFoundException(DepartmentLocation.class.getName()));
@@ -402,7 +402,7 @@ public class DepartmentResourceTest {
   @Test
   @Order(12)
   public void GivenInvalidJwtToken_WhenCreatingDepartmentLocation_ReturnRequestUnauthorized() {
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
     Mockito.when(this.departmentService.createDepartmentLocation(locationCreationDTO))
       .thenThrow(new EntityNotFoundException(DepartmentLocation.class.getName()));
@@ -420,7 +420,7 @@ public class DepartmentResourceTest {
   @Test
   @Order(13)
   public void GivenDepartmentLocationAlreadyExisted_WhenCreatingDepartmentLocation_ReturnRequestConflict() {
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
     Mockito.when(this.departmentService.createDepartmentLocation(locationCreationDTO))
       .thenThrow(this.scenario.mockHibernateUniqueViolationException("department_location_unique"));
@@ -442,7 +442,7 @@ public class DepartmentResourceTest {
   @Test
   @Order(14)
   public void GivenInvalidDepartmentLocation_WhenCreatingDepartmentLocation_ReturnBadRequest() {
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
     Mockito.when(this.departmentService.createDepartmentLocation(locationCreationDTO))
       .thenThrow(
@@ -472,7 +472,7 @@ public class DepartmentResourceTest {
   @Test
   @Order(15)
   public void GivenInvalidJwtToken_WhenUpdatingDepartmentLocation_ReturnRequestUnauthorized() {
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
     given()
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -487,7 +487,7 @@ public class DepartmentResourceTest {
   @Test
   @Order(16)
   public void GivenDepartmentIdNotExisted_WhenUpdatingDepartmentLocation_ReturnRequestNotFound() {
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
     final Long id = this.scenario.mockDepartmentLocationId();
 
     Mockito.when(this.departmentService.updateDepartmentLocation(id, locationCreationDTO))
@@ -512,7 +512,7 @@ public class DepartmentResourceTest {
   @Order(19)
   public void GivenDepartmentLocationAlreadyExisted_WhenUpdatingDepartmentLocation_ReturnRequestConflict() {
     final Long id = this.scenario.mockDepartmentLocationId();
-    final DepartmentLocationCreationDTO locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
+    final DepartmentLocationPayloadDto locationCreationDTO = this.scenario.mockDepartmentLocationCreationDTO();
 
     Mockito.when(this.departmentService.updateDepartmentLocation(id, locationCreationDTO))
       .thenThrow(this.scenario.mockHibernateUniqueViolationException("department_location_unique"));

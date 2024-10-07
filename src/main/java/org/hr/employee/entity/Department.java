@@ -4,37 +4,123 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hr.employee.dto.DepartmentDTO;
+import lombok.*;
+import org.hr.employee.dto.department.DepartmentEmployeeStatisticsDto;
 import org.hr.employee.utils.CommonRegex;
-import org.jboss.resteasy.reactive.DateFormat;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
-@NamedQueries({
-  @NamedQuery(
-    name = "deleteDepartmentById",
-    query = "DELETE Department dept WHERE dept.id = :id"
-  ),
-  @NamedQuery(
-    name = "findDepartmentByName",
-    query = "SELECT d FROM Department d WHERE d.name = :name"
+@EqualsAndHashCode
+@SqlResultSetMappings({
+  @SqlResultSetMapping(
+    name = "DepartmentEmployeeStatisticsDto",
+    classes = {
+      @ConstructorResult(
+        targetClass = DepartmentEmployeeStatisticsDto.class,
+        columns = {
+          @ColumnResult(name = "id", type = Long.class),
+          @ColumnResult(name = "name", type = String.class),
+          @ColumnResult(name = "startDate", type = LocalDateTime.class),
+          @ColumnResult(name = "numberOfEmployees", type = Long.class),
+          @ColumnResult(name = "totalSalary", type = Long.class),
+          @ColumnResult(name = "maximumSalary", type = Long.class),
+          @ColumnResult(name = "minimumSalary", type = Long.class),
+          @ColumnResult(name = "averageSalary", type = Double.class)
+        }
+      )
+    }
   )
 })
+
+@NamedEntityGraphs({
+  @NamedEntityGraph(
+    name = Department.DEPARTMENT_EMPLOYEE_GRAPH,
+    attributeNodes = {
+      @NamedAttributeNode(value = "id"),
+      @NamedAttributeNode(value = "name"),
+      @NamedAttributeNode(value = "startDate"),
+      @NamedAttributeNode(value = "employees")
+    }
+  ),
+  @NamedEntityGraph(
+    name = Department.DEPARTMENT_LOCATIONS_GRAPH,
+    attributeNodes = {
+      @NamedAttributeNode(value = "id"),
+      @NamedAttributeNode(value = "name"),
+      @NamedAttributeNode(value = "startDate"),
+      @NamedAttributeNode(value = "locations")
+    }
+  )
+})
+
+@NamedNativeQueries({
+  @NamedNativeQuery(
+    name = Department.DEPARTMENT_EMPLOYEE_STATISTICS_BY_ID_QUERY,
+    query =
+      """
+      SELECT dept.department_id AS id, dept.department_name AS name, dept.start_date AS startDate,
+      COUNT(emp.employee_id) AS numberOfEmployees, SUM(emp.salary) AS totalSalary, MAX(emp.salary) AS maximumSalary,
+        MIN(emp.salary) AS minimumSalary, AVG(emp.salary) AS averageSalary
+      FROM Department dept
+      INNER JOIN employee emp on dept.department_id = emp.deptid AND dept.department_id = :id
+      GROUP BY dept.department_id, dept.department_name, dept.start_date
+      """,
+    resultSetMapping = "DepartmentEmployeeStatisticsDto"
+  )
+})
+@NamedQueries({
+  @NamedQuery(
+    name = Department.DEPARTMENT_EMPLOYEES_WITH_LOWEST_HOURS_SPENT_PER_ASSIGNMENTS_IN_DESCENDING_ORDER_BY_ID,
+    query = "SELECT dept.id AS departmentId, dept.name AS departmentName, dept.startDate AS departmentStartDate, " +
+      "emp.id AS employeeUUID, emp.employeeId AS employeeId, emp.firstname AS firstname, emp.middlename AS middlename, " +
+      "emp.lastname AS lastname, emp.dateOfBirth AS dateOfBirth, emp.salary AS salary, emp.gender AS gender, " +
+      "AVG(ass.numberOfHours) AS hoursSpentPerAssignment, SUM(ass.numberOfHours) AS totalHours, " +
+      "COUNT(ass.id) AS numberOfAssignments " +
+      "FROM Department AS dept " +
+      "INNER JOIN dept.projects AS proj " +
+        "WITH proj.managedDepartment.id = :id " +
+      "INNER JOIN dept.employees AS emp " +
+      "INNER JOIN emp.assignments AS ass " +
+      "GROUP BY dept.id, emp.id " +
+      "ORDER BY hoursSpentPerAssignment desc " +
+      "LIMIT :limit"
+  ),
+  @NamedQuery(
+    name = Department.DEPARTMENT_EMPLOYEES_WITH_LOWEST_HOURS_SPENT_PER_ASSIGNMENTS_IN_ASCENDING_ORDER_BY_ID,
+    query = "SELECT dept.id AS departmentId, dept.name AS departmentName, dept.startDate AS departmentStartDate, " +
+      "emp.id AS employeeUUID, emp.employeeId AS employeeId, emp.firstname AS firstname, emp.middlename AS middlename, " +
+      "emp.lastname AS lastname, emp.dateOfBirth AS dateOfBirth, emp.salary AS salary, emp.gender AS gender, " +
+      "AVG(ass.numberOfHours) AS hoursSpentPerAssignment, SUM(ass.numberOfHours) AS totalHours, " +
+      "COUNT(ass.id) AS numberOfAssignments " +
+      "FROM Department AS dept " +
+      "INNER JOIN dept.projects AS proj " +
+      "WITH proj.managedDepartment.id = :id " +
+      "INNER JOIN dept.employees AS emp " +
+      "INNER JOIN emp.assignments AS ass " +
+      "GROUP BY dept.id, emp.id " +
+      "ORDER BY hoursSpentPerAssignment asc " +
+      "LIMIT :limit"
+  ),
+  @NamedQuery(
+    name = Department.DEPARTMENT_LOCATIONS_QUERY,
+    query = "SELECT dept FROM Department dept"
+  )
+})
+
 public class Department {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(name = "department_id")
+  @EqualsAndHashCode.Include
   private Long id;
 
   @Column(name = "department_name", unique = true, nullable = false)
@@ -43,45 +129,39 @@ public class Department {
   @Pattern(
     regexp = CommonRegex.NAME_REGEX
   )
+  @EqualsAndHashCode.Include
   private String name;
 
   @Column(name = "start_date", nullable = false)
   @NotNull
-  private Date startDate;
+  @EqualsAndHashCode.Include
+  private LocalDateTime startDate;
 
-  /* Specify department property in class DepartmentLocation  */
-  @OneToOne(mappedBy = "department", fetch = FetchType.EAGER)
-  private DepartmentLocation location;
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+  @Builder.Default
+  @EqualsAndHashCode.Exclude
+  private Set<Employee> employees = new HashSet<>();
 
-  @OneToMany(mappedBy = "managedDepartment", fetch = FetchType.LAZY)
-  private Set<Project> projectSet;
+  @OneToMany(
+    mappedBy = "department",
+    cascade = {CascadeType.MERGE, CascadeType.PERSIST},
+    fetch = FetchType.LAZY
+  )
+  @Builder.Default
+  @EqualsAndHashCode.Exclude
+  private Set<DepartmentLocation> locations = new HashSet<>();
 
-  public Department setId(Long id) {
-    this.id = id;
-    return this;
-  }
+  @OneToMany(mappedBy = "managedDepartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @Builder.Default
+  @EqualsAndHashCode.Exclude
+  private Set<Project> projects = new HashSet<>();
 
-  public Department setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  public Department setStartDate(Date startDate) {
-    this.startDate = startDate;
-    return this;
-  }
-
-  public Department setLocation(DepartmentLocation location) {
-    this.location = location;
-    return this;
-  }
-
-  public Department setProjectSet(Set<Project> projectSet) {
-    this.projectSet = projectSet;
-    return this;
-  }
-
-  public DepartmentDTO toDepartmentDTO() {
-    return new DepartmentDTO(this.id, this.name, this.startDate);
-  }
+  public static final String DEPARTMENT_EMPLOYEE_GRAPH = "Department.Department-employee-graph";
+  public static final String DEPARTMENT_EMPLOYEE_STATISTICS_BY_ID_QUERY = "Department.findDepartmentStatisticsById";
+  public static final String DEPARTMENT_EMPLOYEES_WITH_LOWEST_HOURS_SPENT_PER_ASSIGNMENTS_IN_DESCENDING_ORDER_BY_ID =
+    "Department.findEmployeeWithLowestHoursSpentPerAssignmentsInDescendingOrder";
+  public static final String DEPARTMENT_EMPLOYEES_WITH_LOWEST_HOURS_SPENT_PER_ASSIGNMENTS_IN_ASCENDING_ORDER_BY_ID =
+    "Department.findEmployeeWithLowestHoursSpentPerAssignmentsInAscendingOrder";
+  public static final String DEPARTMENT_LOCATIONS_GRAPH = "Department.Department-locations-graph";
+  public static final String DEPARTMENT_LOCATIONS_QUERY = "Department.findDepartmentsWithLocations";
 }

@@ -1,27 +1,26 @@
 package org.hr.employee.scenario;
 
-import org.hr.employee.dto.DepartmentCreationDTO;
-import org.hr.employee.dto.DepartmentDTO;
-import org.hr.employee.dto.DepartmentLocationCreationDTO;
-import org.hr.employee.dto.DepartmentLocationDTO;
+import org.hr.employee.dto.department.DepartmentPayloadDto;
+import org.hr.employee.dto.department.DepartmentResponseDto;
+import org.hr.employee.dto.department.location.DepartmentLocationPayloadDto;
+import org.hr.employee.dto.department.location.DepartmentLocationResponseDTO;
 import org.hr.employee.entity.Department;
-import org.hr.employee.entity.DepartmentLocation;
 
 import java.util.Optional;
 
 public interface DepartmentTestScenario {
 
   org.hibernate.exception.ConstraintViolationException mockHibernateUniqueViolationException(String constraintName);
-  DepartmentDTO mockDepartmentDTO();
+  DepartmentResponseDto mockDepartmentResponseDto();
   String mockInvalidJwtToken();
-  DepartmentCreationDTO mockDepartmentCreationDTO();
-  DepartmentLocationCreationDTO mockDepartmentLocationCreationDTOWithInvalidLocation();
+  DepartmentPayloadDto mockDepartmentCreationDTO();
+  DepartmentLocationPayloadDto mockDepartmentLocationCreationDTOWithInvalidLocation();
   Long mockDepartmentId();
   Long mockDepartmentLocationId();
-  DepartmentLocationCreationDTO mockDepartmentLocationCreationDTO();
-  DepartmentLocationDTO mockDepartmentLocationDTO();
+  DepartmentLocationPayloadDto mockDepartmentLocationCreationDTO();
+  DepartmentLocationResponseDTO mockDepartmentLocationDTO();
   jakarta.validation.ConstraintViolationException mockJakartaConstraintViolationException(Object o);
-  DepartmentCreationDTO mockDepartmentCreationDTOWithInvalidName();
+  DepartmentPayloadDto mockDepartmentCreationDTOWithInvalidName();
 
   Optional<Department> mockOptionalDepartment();
 }
