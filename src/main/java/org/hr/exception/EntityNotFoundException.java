@@ -1,11 +1,15 @@
 package org.hr.exception;
 
-import jakarta.ws.rs.core.Response;
-import org.hr.exception.mapper.HumanResourceException;
+import java.time.LocalDateTime;
 
-public class EntityNotFoundException extends HumanResourceException {
+public final class EntityNotFoundException extends HumanResourceException {
 
   public EntityNotFoundException(String fieldName, String entityName) {
-    super(fieldName, String.format("The %s is not found", entityName), Response.Status.NOT_FOUND);
+    super(
+      fieldName,
+      String.format("The %s is not found", entityName),
+      LocalDateTime.now()
+    );
   }
+
 }

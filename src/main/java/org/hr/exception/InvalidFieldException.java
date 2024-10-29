@@ -1,15 +1,14 @@
 package org.hr.exception;
 
-import jakarta.ws.rs.core.Response;
-import org.hr.exception.mapper.HumanResourceException;
+import java.time.LocalDateTime;
 
-public class InvalidFieldException extends HumanResourceException {
+public final class InvalidFieldException extends HumanResourceException {
 
-  public InvalidFieldException(String property, String message) {
+  public InvalidFieldException(String fieldName, String message) {
     super(
-      property,
+      fieldName,
       message,
-      Response.Status.BAD_REQUEST
+      LocalDateTime.now()
     );
   }
 }

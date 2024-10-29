@@ -1,12 +1,16 @@
 package org.hr.exception;
 
-import jakarta.ws.rs.core.Response;
-import org.hr.exception.mapper.HumanResourceException;
+
+import java.time.LocalDateTime;
 
 
-public class DuplicateFieldException extends HumanResourceException {
+public final class DuplicateFieldException extends HumanResourceException {
 
   public DuplicateFieldException(String fieldName) {
-    super(fieldName, String.format("The %s field has already existed", fieldName), Response.Status.CONFLICT);
+    super(
+      fieldName,
+      String.format("The %s field has already existed", fieldName),
+      LocalDateTime.now()
+    );
   }
 }

@@ -1,7 +1,6 @@
-package org.hr.exception.handler;
+package org.hr.exception.converter;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.persistence.NoResultException;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hr.employee.entity.Project;
 import org.hr.exception.*;
-import org.hr.exception.mapper.HumanResourceException;
 
 import java.lang.annotation.Annotation;
 import java.util.Locale;
@@ -19,10 +17,8 @@ import java.util.Optional;
 import static org.hr.employee.utils.ConstraintMessage.*;
 import static org.postgresql.util.PSQLState.*;
 
-@Dependent
+@ApplicationScoped
 public class ExceptionConverterImpl implements ExceptionConverter {
-
-  protected static final String UNIQUE_CONSTRAINT_ERROR_CODE = "23505";
 
   protected Optional<String> getFieldNameFrom(String constraintName) {
     if (constraintName == null) {
