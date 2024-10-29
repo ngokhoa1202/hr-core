@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 public class HumanResourceException extends WebApplicationException {
 
+
   public HumanResourceException(final String fieldName, final String message, final Response.Status status) {
 
     super(Response.status(status)

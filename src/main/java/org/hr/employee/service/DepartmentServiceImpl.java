@@ -49,14 +49,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
   @Override
   public void deleteDepartment(@NonNull Long id) throws EntityNotFoundException {
-    Log.tracef(
-      "%s layer: %s(%s:%s) is invoked by %s",
-      LoggingUtil.Layer.Service.toString(),
-      LoggingUtil.getCurrentMethod(),
-      "id",
-      Long.class.getName(),
-      LoggingUtil.getCallerMethod()
-    );
+
     this.departmentDAO.deleteById(id);
     this.cacheService.evictCachedDepartments();
   }
@@ -67,11 +60,7 @@ public class DepartmentServiceImpl implements DepartmentService {
   ) throws EntityNotFoundException, JDBCException, InvalidRequestBodyException {
 
     Department department = this.departmentDAO.findById(id)
-      .orElseThrow(() -> {
-        EntityNotFoundException ex =  new EntityNotFoundException("id", Department.class.getSimpleName());
-
-        return ex;
-      });
+      .orElseThrow(() -> new EntityNotFoundException("id", Department.class.getSimpleName()));
 
     department.setName(departmentPayloadDTO.name());
     department.setStartDate(departmentPayloadDTO.startDate());

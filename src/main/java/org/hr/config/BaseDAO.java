@@ -42,6 +42,10 @@ public abstract class BaseDAO<E> {
     return Optional.of(entityUpdated);
   }
 
+  public Optional<E> findById(Integer id) {
+    return Optional.ofNullable(this.entityManager.find(entityClass, id));
+  }
+
   public Optional<E> findById(Long id) {
     return Optional.ofNullable(this.entityManager.find(entityClass, id));
   }
@@ -79,22 +83,14 @@ public abstract class BaseDAO<E> {
 
   public void deleteById(Long id) throws EntityNotFoundException {
     E entityDeleted = this.findById(id)
-      .orElseThrow(() -> {
-        EntityNotFoundException ex = new EntityNotFoundException("id", this.entityClass.getSimpleName());
-        Log.infof(ex, "An exception %s has been thrown", ex.getClass().getName());
-        return ex;
-      });
+      .orElseThrow(() -> new EntityNotFoundException("id", this.entityClass.getSimpleName()));
     this.entityManager.remove(entityDeleted);
   }
 
   public void deleteById(UUID id) throws EntityNotFoundException {
 
     E entityDeleted = this.findById(id)
-      .orElseThrow(() -> {
-        EntityNotFoundException ex = new EntityNotFoundException("id", this.entityClass.getSimpleName());
-        Log.infof(ex, "An exception %s has been thrown", ex.getClass().getName());
-        return ex;
-      });
+      .orElseThrow(() -> new EntityNotFoundException("id", this.entityClass.getSimpleName()));
     this.entityManager.remove(entityDeleted);
   }
 

@@ -1,7 +1,6 @@
 package org.hr.employee.resource;
 
 import io.quarkus.security.Authenticated;
-import io.quarkus.security.jpa.Roles;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotBlank;

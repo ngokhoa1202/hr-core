@@ -95,6 +95,17 @@ public class ExceptionConverterImpl implements ExceptionConverter {
         return this.convertJakartaValidationException(exc);
       }
 
+      case EntityNotFoundException exc -> {
+        return exc;
+      }
+
+      case UnauthorizedException exc -> {
+        return exc;
+      }
+
+      case DuplicateFieldException exc -> {
+        return exc;
+      }
 
       default -> {
         return new InvalidRequestBodyException(ex.getMessage());

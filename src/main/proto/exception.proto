@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.gateway.exception";
+option java_outer_classname = "GatewayException";
+
+package exception;
+
+message ExceptionProto {
+  int32 status = 1;
+  string field = 2;
+  string message = 3;
+  string timeStamp = 4;
+}
+

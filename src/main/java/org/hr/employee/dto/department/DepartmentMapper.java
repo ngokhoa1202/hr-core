@@ -1,6 +1,8 @@
 package org.hr.employee.dto.department;
 
 import jakarta.persistence.Tuple;
+import org.gateway.service.department.DepartmentPlainProto;
+import org.gateway.service.department.DepartmentResponseProto;
 import org.hr.employee.dto.department.location.DepartmentLocationMapper;
 import org.hr.employee.dto.department.location.DepartmentLocationPlainDto;
 import org.hr.employee.entity.Department;
@@ -55,6 +57,24 @@ public interface DepartmentMapper {
       .toList();
   }
 
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "location", target = "location")
+  DepartmentResponseProto.DepartmentLocationPlainProto departmentLocationPlainDtoToDepartmentLocationPlainProto(
+    DepartmentLocationPlainDto departmentLocationPlainDto
+  );
 
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "startDate", target = "startDate")
+  @Mapping(source = "locationPlainDtos", target = "locationProtosList", qualifiedByName = "toLocationPlainProtos")
+  DepartmentResponseProto departmentResponseDtoToDepartmentResponseProto(DepartmentResponseDto departmentResponseDto);
 
+  @Named("toLocationPlainProtos")
+  default List<DepartmentResponseProto.DepartmentLocationPlainProto> toLocationPlainProtos(
+    List<DepartmentLocationPlainDto> departmentLocationPlainDtos
+  ) {
+    return departmentLocationPlainDtos.stream()
+      .map(DepartmentMapper.INSTANCE::departmentLocationPlainDtoToDepartmentLocationPlainProto)
+      .toList();
+  }
 }

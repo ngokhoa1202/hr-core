@@ -12,40 +12,45 @@ repositories {
 val quarkusPlatformGroupId: String by project
 val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project
+val quarkusPluginId: String by project
+val lombokVersion: String by project
+val mapstructVersion: String by project
+val lombokMapStructBindingVersion: String by project
 
 dependencies {
-  implementation("io.quarkus:quarkus-security-jpa")
-  implementation("io.quarkus:quarkus-smallrye-jwt")
-  implementation("io.quarkus:quarkus-smallrye-jwt-build")
-  implementation("io.quarkus:quarkus-container-image-docker")
-  implementation("io.quarkus:quarkus-cache")
   implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
-  implementation("io.quarkus:quarkus-rest")
-  implementation("io.quarkus:quarkus-rest-jackson")
-  implementation("io.quarkus:quarkus-arc")
-  implementation("io.quarkus:quarkus-jdbc-postgresql")
-  implementation("io.quarkus:quarkus-smallrye-openapi")
-  implementation("io.quarkus:quarkus-hibernate-orm")
-  implementation("io.quarkus:quarkus-hibernate-validator")
+  implementation("${quarkusPluginId}:quarkus-smallrye-jwt")
+  implementation("${quarkusPluginId}:quarkus-smallrye-jwt-build")
+  implementation("${quarkusPluginId}:quarkus-container-image-docker")
+  implementation("${quarkusPluginId}:quarkus-cache")
+
+  implementation("${quarkusPluginId}:quarkus-rest")
+  implementation("${quarkusPluginId}:quarkus-rest-jackson")
+  implementation("${quarkusPluginId}:quarkus-arc")
+  implementation("${quarkusPluginId}:quarkus-jdbc-postgresql")
+  implementation("${quarkusPluginId}:quarkus-smallrye-openapi")
+  implementation("${quarkusPluginId}:quarkus-hibernate-orm")
+  implementation("${quarkusPluginId}:quarkus-hibernate-validator")
+  implementation("${quarkusPluginId}:quarkus-grpc")
 
 
-  compileOnly("org.projectlombok:lombok:1.18.34")
-  annotationProcessor("org.projectlombok:lombok:1.18.34")
+  compileOnly("org.projectlombok:lombok:${lombokVersion}")
+  annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
-  implementation("org.mapstruct:mapstruct:1.6.0")
-  annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0")
+  implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+  annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
 
-  implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
-  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+  implementation("org.projectlombok:lombok-mapstruct-binding:${lombokMapStructBindingVersion}")
+  annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${lombokMapStructBindingVersion}")
 
   testImplementation("io.quarkus:quarkus-junit5")
   testImplementation("io.rest-assured:rest-assured")
-  testImplementation("org.projectlombok:lombok:1.18.34")
+  testImplementation("org.projectlombok:lombok:${lombokVersion}")
   testImplementation("io.quarkus:quarkus-junit5-mockito")
 }
 
 group = "org.hr"
-version = "1.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 java {
   sourceCompatibility = JavaVersion.VERSION_21

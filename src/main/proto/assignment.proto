@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.gateway.service.project.assignment";
+option java_outer_classname = "AssignmentProto";
+
+
+package project.assignment;
+
+service AssignmentGrpcService {
+  rpc CreateAssignment(AssignmentPayloadProto) returns (AssignmentResponseProto) {}
+}
+
+message AssignmentPayloadProto {
+  message EmployeePlainProto {
+    string id = 1;
+    string employeeId = 2;
+    string firstname = 3;
+    string lastname = 4;
+    string middlename = 5;
+    string dateOfBirth = 6;
+    string gender = 7;
+    int32 salary = 8;
+  }
+
+  message ProjectPlainProto {
+    string id = 1;
+    string name = 2;
+    string area = 3;
+  }
+
+  int32 numberOfHours = 1;
+  EmployeePlainProto employeePlaintProto = 2;
+  ProjectPlainProto projectPlaintProto = 3;
+}
+
+message AssignmentResponseProto {
+  message EmployeePlainProto {
+    string id = 1;
+    string employeeId = 2;
+    string firstname = 3;
+    string lastname = 4;
+    string middlename = 5;
+    string dateOfBirth = 6;
+    string gender = 7;
+    int32 salary = 8;
+  }
+
+  message ProjectPlainProto {
+    string id = 1;
+    string name = 2;
+    string area = 3;
+  }
+
+  string id = 1;
+  int32 numberOfHours = 2;
+  EmployeePlainProto employeePlaintProto = 3;
+  ProjectPlainProto projectPlaintProto = 4;
+}
