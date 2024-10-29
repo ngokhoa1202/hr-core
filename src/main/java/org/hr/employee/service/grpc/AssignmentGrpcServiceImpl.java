@@ -3,7 +3,6 @@ package org.hr.employee.service.grpc;
 import io.quarkus.grpc.GrpcService;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.vertx.core.Future;
 import lombok.RequiredArgsConstructor;
 import org.gateway.service.project.assignment.AssignmentGrpcService;
 import org.gateway.service.project.assignment.AssignmentPayloadProto;
@@ -11,12 +10,14 @@ import org.gateway.service.project.assignment.AssignmentResponseProto;
 import org.hr.employee.dto.project.assignment.AssignmentMapper;
 import org.hr.employee.dto.project.assignment.AssignmentPayloadDto;
 import org.hr.employee.service.AssignmentService;
+import org.hr.exception.converter.ExceptionConverter;
 
 @GrpcService
 @RequiredArgsConstructor
 public class AssignmentGrpcServiceImpl implements AssignmentGrpcService {
 
   private final AssignmentService assignmentService;
+  private final ExceptionConverter exceptionConverter;
 
   @Override
   public Uni<AssignmentResponseProto> createAssignment(AssignmentPayloadProto assignmentPayloadProto) {
@@ -26,8 +27,7 @@ public class AssignmentGrpcServiceImpl implements AssignmentGrpcService {
     })
       .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
       .onItem().transform(AssignmentMapper.INSTANCE::assignmentResponseDtoToAssignmentResponseProto)
-      .onFailure().transform((throwable) -> )
-      ;
+      .onFailure().transform((throwable) -> this.exceptionConverter.convert((RuntimeException) throwable));
 
   }
 }
