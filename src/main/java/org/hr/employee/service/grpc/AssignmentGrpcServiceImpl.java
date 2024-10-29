@@ -1,4 +1,4 @@
 package org.hr.employee.service.grpc;
 
-public class AssignmentGrpcService {
+public class AssignmentGrpcServiceImpl {
 }
