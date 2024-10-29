@@ -13,8 +13,8 @@ import org.hr.employee.dto.project.ProjectPayloadDto;
 import org.hr.employee.dto.project.ProjectResponseDto;
 import org.hr.employee.service.AssignmentService;
 import org.hr.employee.service.ProjectService;
-import org.hr.exception.handler.ExceptionConverter;
-import org.hr.exception.mapper.HumanResourceException;
+import org.hr.exception.EntityNotFoundException;
+import org.hr.exception.converter.ExceptionConverter;
 import org.jboss.resteasy.reactive.RestPath;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -34,14 +34,14 @@ public class ProjectResource {
 
   @Path("{id}")
   @GET
-  public RestResponse<ProjectResponseDto> getProject(@RestPath(value = "id") Long id) throws HumanResourceException {
+  public RestResponse<ProjectResponseDto> getProject(@RestPath(value = "id") Long id) throws EntityNotFoundException.HumanResourceException {
     ProjectResponseDto projectResponseDto = this.projectService.getProject(id);
     return RestResponse.ok(projectResponseDto);
   }
 
   @Path("")
   @POST
-  public RestResponse<String> createProject(@RequestBody ProjectPayloadDto projectPayloadDto) throws HumanResourceException {
+  public RestResponse<String> createProject(@RequestBody ProjectPayloadDto projectPayloadDto) throws EntityNotFoundException.HumanResourceException {
     try {
       ProjectResponseDto projectResponseDto = this.projectService.createProject(projectPayloadDto);
       return RestResponse.created(URI.create(this.url + projectResponseDto.id().toString()));
@@ -54,7 +54,7 @@ public class ProjectResource {
   @PUT
   public RestResponse<String> updateProject(
     @RestPath(value = "id") Long projectId, @RequestBody ProjectPayloadDto projectPayloadDto
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
     try {
       ProjectResponseDto projectResponseDto = this.projectService.updateProject(projectId, projectPayloadDto);
       return RestResponse.created(URI.create(this.url + projectResponseDto.id().toString()));
@@ -65,7 +65,7 @@ public class ProjectResource {
 
   @Path("{id}")
   @DELETE
-  public RestResponse<String> deleteProject(@RestPath(value = "id") Long projectId) throws HumanResourceException {
+  public RestResponse<String> deleteProject(@RestPath(value = "id") Long projectId) throws EntityNotFoundException.HumanResourceException {
     this.projectService.deleteProject(projectId);
     return RestResponse.noContent();
   }
@@ -73,7 +73,7 @@ public class ProjectResource {
   @Path("assignments")
   @POST
   public RestResponse<String> createAssignment(AssignmentPayloadDto assignmentPayloadDto)
-    throws HumanResourceException {
+    throws EntityNotFoundException.HumanResourceException {
 
     try {
       AssignmentResponseDto assignmentResponseDTO = this.assignmentService.createAssignment(assignmentPayloadDto);
@@ -86,7 +86,7 @@ public class ProjectResource {
   @Path("assignments/{id}")
   @GET
   public RestResponse<AssignmentResponseDto> getAssignment(@RestPath(value = "id") Long id)
-    throws HumanResourceException {
+    throws EntityNotFoundException.HumanResourceException {
 
     AssignmentResponseDto assignmentResponseDto = this.assignmentService.getAssignment(id);
     return RestResponse.ok(assignmentResponseDto);
@@ -96,7 +96,7 @@ public class ProjectResource {
   @PUT
   public RestResponse<String> updateAssignment(
     @RestPath(value = "id") Long id, @RequestBody AssignmentPayloadDto assignmentPayloadDto
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       AssignmentResponseDto assignmentResponseDTO = this.assignmentService.updateAssignment(id, assignmentPayloadDto);
@@ -108,7 +108,7 @@ public class ProjectResource {
 
   @Path("assignments/{id}")
   @DELETE
-  public RestResponse<String> deleteAssignment(@RestPath(value = "id") Long id) throws HumanResourceException {
+  public RestResponse<String> deleteAssignment(@RestPath(value = "id") Long id) throws EntityNotFoundException.HumanResourceException {
 
     this.assignmentService.deleteAssignment(id);
     return RestResponse.noContent();
@@ -118,7 +118,7 @@ public class ProjectResource {
   @GET
   public RestResponse<List<ProjectAssignmentStatisticsDto>> getProjectsWithHighestHoursSpentInDescendingOrder(
     @RestPath("limit") int limit
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     List<ProjectAssignmentStatisticsDto> projectAssignmentStatisticsDtos = this.projectService
       .getProjectsWithHighestHoursSpentInDescendingOrder(limit);

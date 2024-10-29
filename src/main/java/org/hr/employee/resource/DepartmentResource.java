@@ -18,8 +18,8 @@ import org.hr.employee.dto.employee.EmployeeDepartmentAssignmentStatisticsDto;
 import org.hr.employee.dto.employee.EmployeeResponseDto;
 import org.hr.employee.service.DepartmentLocationService;
 import org.hr.employee.service.DepartmentService;
-import org.hr.exception.handler.ExceptionConverter;
-import org.hr.exception.mapper.HumanResourceException;
+import org.hr.exception.EntityNotFoundException;
+import org.hr.exception.converter.ExceptionConverter;
 import org.jboss.resteasy.reactive.RestPath;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -40,7 +40,7 @@ public class DepartmentResource {
   @Path("{id}")
   @GET
   @PermitAll
-  public RestResponse<DepartmentResponseDto> getDepartment(@RestPath(value="id") Long id) throws HumanResourceException {
+  public RestResponse<DepartmentResponseDto> getDepartment(@RestPath(value="id") Long id) throws EntityNotFoundException.HumanResourceException {
     DepartmentResponseDto departmentDTO = this.departmentService.getDepartment(id);
     return RestResponse.ok(departmentDTO);
   }
@@ -51,7 +51,7 @@ public class DepartmentResource {
   @RolesAllowed({"admin"})
   public RestResponse<String> createDepartment(
     @RequestBody DepartmentPayloadDto departmentPayloadDTO
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       DepartmentResponseDto departmentDTO = this.departmentService.createDepartment(departmentPayloadDTO);
@@ -66,7 +66,7 @@ public class DepartmentResource {
   @RolesAllowed({"admin"})
   public RestResponse<DepartmentResponseDto> updateDepartment(
     @RestPath(value = "id") Long departmentId, @RequestBody DepartmentPayloadDto departmentPayloadDTO
-  ) throws HumanResourceException  {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       DepartmentResponseDto departmentDTO = this.departmentService.updateDepartment(departmentId, departmentPayloadDTO);
@@ -79,7 +79,7 @@ public class DepartmentResource {
   @Path("{id}")
   @DELETE
   @RolesAllowed({"admin"})
-  public RestResponse<String> deleteDepartment(@RestPath(value="id") Long id) throws HumanResourceException {
+  public RestResponse<String> deleteDepartment(@RestPath(value="id") Long id) throws EntityNotFoundException.HumanResourceException {
     this.departmentService.deleteDepartment(id);
     return RestResponse.noContent();
   }
@@ -88,7 +88,7 @@ public class DepartmentResource {
   @GET
   @PermitAll
   public RestResponse<DepartmentLocationResponseDTO> getDepartmentLocation(@RestPath(value="id") Long id)
-    throws HumanResourceException {
+    throws EntityNotFoundException.HumanResourceException {
 
     DepartmentLocationResponseDTO locationDTO = this.locationService.getDepartmentLocation(id);
     return RestResponse.ok(locationDTO);
@@ -99,7 +99,7 @@ public class DepartmentResource {
   @RolesAllowed({"admin"})
   public RestResponse<String> createDepartmentLocation(
     @RequestBody DepartmentLocationPayloadDto departmentLocationPayloadDTO
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       DepartmentLocationResponseDTO departmentLocationDTO = this.locationService.createDepartmentLocation(departmentLocationPayloadDTO);
@@ -114,7 +114,7 @@ public class DepartmentResource {
   @RolesAllowed({"admin", "user"})
   public RestResponse<DepartmentLocationResponseDTO> updateDepartmentLocation(
     Long id, @RequestBody DepartmentLocationPayloadDto departmentLocationPayloadDTO
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       DepartmentLocationResponseDTO locationDTO = this.locationService.updateDepartmentLocation(id, departmentLocationPayloadDTO);
@@ -129,7 +129,7 @@ public class DepartmentResource {
   @DELETE
   @RolesAllowed({"admin"})
   public RestResponse<String> deleteDepartmentLocation(@RestPath(value="id") Long id)
-    throws HumanResourceException {
+    throws EntityNotFoundException.HumanResourceException {
 
     this.locationService.deleteDepartmentLocation(id);
     return RestResponse.noContent();
@@ -138,7 +138,7 @@ public class DepartmentResource {
   @Path("")
   @GET
   @RolesAllowed({"admin", "user"})
-  public RestResponse<List<DepartmentResponseDto>> getDepartments() throws HumanResourceException {
+  public RestResponse<List<DepartmentResponseDto>> getDepartments() throws EntityNotFoundException.HumanResourceException {
 
     List<DepartmentResponseDto> departmentDTOs = this.departmentService.getDepartments();
     return RestResponse.ok(departmentDTOs);
@@ -157,7 +157,7 @@ public class DepartmentResource {
   @GET
   @RolesAllowed({"admin"})
   public RestResponse<DepartmentEmployeeStatisticsDto> getDepartmentWithEmployeeStatistics(@RestPath(value = "id") Long id)
-    throws HumanResourceException {
+    throws EntityNotFoundException.HumanResourceException {
 
     DepartmentEmployeeStatisticsDto departmentEmployeeStatisticsDto = this.departmentService.getDepartmentWithEmployeeStatistics(id);
     return RestResponse.ok(departmentEmployeeStatisticsDto);
@@ -167,7 +167,7 @@ public class DepartmentResource {
   @GET
   public RestResponse<List<EmployeeResponseDto>> getEmployeesWithSalaryGreaterOrEqualToGivenSalaryWithinDepartment(
     @RestPath("id") Long id, @RestPath("salary") int salary, @RestPath("limit") int limit
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     List<EmployeeResponseDto> employeeResponseDtos = this.departmentService
       .getEmployeesWithSalaryGreaterOrEqualToGivenSalaryWithinDepartment(id, salary, limit);
@@ -178,7 +178,7 @@ public class DepartmentResource {
   @GET
   public RestResponse<List<EmployeeDepartmentAssignmentStatisticsDto>> getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInDescendingOrder(
     @RestPath("id") Long id, @RestPath("limit") int limit
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     List<EmployeeDepartmentAssignmentStatisticsDto> employeeDepartmentAssignmentStatisticsDtos =
       this.departmentService.getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInDescendingOrder(id, limit);
@@ -189,13 +189,10 @@ public class DepartmentResource {
   @GET
   public RestResponse<List<EmployeeDepartmentAssignmentStatisticsDto>> getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInAscendingOrder(
     @RestPath("id") Long id, @RestPath("limit") int limit
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
     List<EmployeeDepartmentAssignmentStatisticsDto> employeeDepartmentAssignmentStatisticsDtos =
       this.departmentService.getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInAscendingOrder(id, limit);
     return RestResponse.ok(employeeDepartmentAssignmentStatisticsDtos);
   }
 
-
-}{
-    "williamboman/mason.nvim"
 }

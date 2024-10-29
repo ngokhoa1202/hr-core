@@ -15,8 +15,8 @@ import org.hr.employee.dto.employee.EmployeePayloadDto;
 import org.hr.employee.dto.employee.EmployeeResponseDto;
 import org.hr.employee.dto.TotalNumberDTO;
 import org.hr.employee.service.EmployeeService;
-import org.hr.exception.handler.ExceptionConverter;
-import org.hr.exception.mapper.HumanResourceException;
+import org.hr.exception.EntityNotFoundException;
+import org.hr.exception.converter.ExceptionConverter;
 import org.jboss.resteasy.reactive.RestPath;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -39,7 +39,7 @@ public class EmployeeResource {
   @GET
   @RolesAllowed({"admin", "user"})
   public RestResponse<EmployeeResponseDto> getEmployee(@RestPath(value="id") UUID id)
-    throws HumanResourceException {
+    throws EntityNotFoundException.HumanResourceException {
 
     EmployeeResponseDto employeeDTO = this.employeeService.getEmployee(id);
     return RestResponse.ok(employeeDTO);
@@ -58,7 +58,7 @@ public class EmployeeResource {
   @RolesAllowed({"admin"})
   public RestResponse<String> createEmployee(
     @RequestBody EmployeePayloadDto employeePayloadDTO
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       EmployeeResponseDto employeeDTO = this.employeeService.createEmployee(employeePayloadDTO);
@@ -73,7 +73,7 @@ public class EmployeeResource {
   @RolesAllowed({"admin"})
   public RestResponse<String> updateEmployee(
     @RestPath(value = "id") UUID id, @RequestBody EmployeePayloadDto employeeWithoutIdDTO
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     try {
       EmployeeResponseDto employee = this.employeeService.updateEmployee(id, employeeWithoutIdDTO);
@@ -86,7 +86,7 @@ public class EmployeeResource {
   @Path("{id}")
   @DELETE
   @RolesAllowed({"admin"})
-  public RestResponse<String> deleteEmployee(@RestPath(value = "id") UUID id) throws HumanResourceException {
+  public RestResponse<String> deleteEmployee(@RestPath(value = "id") UUID id) throws EntityNotFoundException.HumanResourceException {
     this.employeeService.deleteEmployee(id);
     return RestResponse.noContent();
   }
@@ -104,7 +104,7 @@ public class EmployeeResource {
   public RestResponse<List<EmployeeResponseDto>> getEmployeesByEmployeeId(
     @NotBlank @RestPath("employeeId") String employeeId, @RestPath("startIndex") int startIndex,
     @RestPath("limit") int limit
-  ) throws HumanResourceException {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     List<EmployeeResponseDto> employeeResponseDtos = this.employeeService.getEmployeesByEmployeeId(employeeId, startIndex, limit);
     return RestResponse.ok(employeeResponseDtos);
@@ -115,7 +115,7 @@ public class EmployeeResource {
   @RolesAllowed({"admin"})
   public RestResponse<List<EmployeeResponseDto>> getEmployeesByName(
     @RestPath("name") String name, @RestPath("startIndex") int startIndex, @RestPath("limit") int limit
-  ) throws HumanResourceException  {
+  ) throws EntityNotFoundException.HumanResourceException {
 
     List<EmployeeResponseDto> employeeResponseDtos = this.employeeService.getEmployeesByName(name, startIndex, limit);
     return RestResponse.ok(employeeResponseDtos);
@@ -125,7 +125,7 @@ public class EmployeeResource {
   @GET
   @RolesAllowed({"admin"})
   public RestResponse<EmployeeAssignmentStatisticsDto> getEmployeeWithAssignmentStatistics(@RestPath("id") UUID id)
-    throws HumanResourceException{
+    throws EntityNotFoundException.HumanResourceException {
 
     EmployeeAssignmentStatisticsDto employeeAssignmentStatisticsDto = this.employeeService.getEmployeeWithAssignmentStatistics(id);
     return RestResponse.ok(employeeAssignmentStatisticsDto);

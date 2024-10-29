@@ -1,6 +1,7 @@
 package org.hr.employee.dto.project;
 
 import jakarta.persistence.Tuple;
+import org.gateway.service.project.assignment.AssignmentPayloadProto;
 import org.hr.employee.dto.department.DepartmentMapper;
 import org.hr.employee.dto.project.assignment.AssignmentMapper;
 import org.hr.employee.dto.project.assignment.AssignmentPlainDto;
@@ -51,6 +52,11 @@ public interface ProjectMapper {
   @Mapping(expression = "java(tuple.get(\"totalHours\", Long.class))", target = "totalHours")
   @Mapping(expression = "java(tuple.get(\"hoursSpentPerAssignment\", Double.class))", target = "hoursSpentPerAssignment")
   ProjectAssignmentStatisticsDto tupleToProjectAssignmentStatisticsDto(Tuple tuple);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "area", target = "area")
+  ProjectPlainDto projectPlainProtoToProjectPlainDto(AssignmentPayloadProto.ProjectPlainProto projectPlainProto);
 
   @Named(value = "toAssignmentPlainDtos")
   default List<AssignmentPlainDto> toAssignmentPlainDtos(Set<Assignment> assignments) {

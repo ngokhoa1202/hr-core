@@ -7,7 +7,6 @@ import org.hr.employee.dto.department.DepartmentResponseDto;
 import org.hr.employee.entity.Department;
 import org.hr.employee.scenario.DepartmentTestScenario;
 import org.hr.exception.EntityNotFoundException;
-import org.hr.exception.mapper.HumanResourceException;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +48,7 @@ public class DepartmentServiceTest {
     Mockito.when(this.departmentDAO.findDepartmentById(id))
       .thenReturn(Optional.empty());
 
-    HumanResourceException ex = assertThrows(
+    EntityNotFoundException.HumanResourceException ex = assertThrows(
       EntityNotFoundException.class,
       () -> {
         this.departmentService.getDepartment(id);

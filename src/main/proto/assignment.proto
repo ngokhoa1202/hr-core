@@ -30,8 +30,8 @@ message AssignmentPayloadProto {
   }
 
   int32 numberOfHours = 1;
-  EmployeePlainProto employeePlaintProto = 2;
-  ProjectPlainProto projectPlaintProto = 3;
+  EmployeePlainProto employeePlainProto = 2;
+  ProjectPlainProto projectPlainProto = 3;
 }
 
 message AssignmentResponseProto {
@@ -54,6 +54,6 @@ message AssignmentResponseProto {
 
   string id = 1;
   int32 numberOfHours = 2;
-  EmployeePlainProto employeePlaintProto = 3;
-  ProjectPlainProto projectPlaintProto = 4;
+  EmployeePlainProto employeePlainProto = 3;
+  ProjectPlainProto projectPlainProto = 4;
 }
