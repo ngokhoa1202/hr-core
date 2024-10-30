@@ -43,7 +43,7 @@ public interface AssignmentMapper {
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "numberOfHours", target = "numberOfHours")
-  @Mapping(source = "employeePlainProto", target = "employeePlainDto")
-  @Mapping(source = "projectPlainProto", target = "projectPlainDto")
+  @Mapping(source = "employeePlainDto", target = "employeePlainProto")
+  @Mapping(source = "projectPlainDto", target = "projectPlainProto")
   AssignmentResponseProto assignmentResponseDtoToAssignmentResponseProto(AssignmentResponseDto assignmentResponseDto);
 }

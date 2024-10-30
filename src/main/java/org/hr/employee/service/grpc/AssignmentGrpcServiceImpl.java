@@ -28,6 +28,5 @@ public class AssignmentGrpcServiceImpl implements AssignmentGrpcService {
       .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
       .onItem().transform(AssignmentMapper.INSTANCE::assignmentResponseDtoToAssignmentResponseProto)
       .onFailure().transform((throwable) -> this.exceptionConverter.convert((RuntimeException) throwable));
-
   }
 }
