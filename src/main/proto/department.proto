@@ -4,10 +4,15 @@ option java_multiple_files = true;
 option java_package = "org.gateway.service.department";
 option java_outer_classname = "DepartmentProto";
 
+import "google/protobuf/empty.proto";
+
 package department;
 
 service DepartmentGrpcService {
   rpc GetDepartmentById (DepartmentIdProto) returns (DepartmentResponseProto) {}
+  rpc CreateDepartment (DepartmentPayloadProto) returns (DepartmentResponseProto) {}
+  rpc UpdateDepartment (DepartmentPlainProto) returns (DepartmentResponseProto) {}
+  rpc DeleteDepartment (DepartmentIdProto) returns (google.protobuf.Empty) {}
 }
 
 message DepartmentIdProto {
@@ -16,6 +21,11 @@ message DepartmentIdProto {
 
 message DepartmentPlainProto {
   int64 id = 1;
+  string name = 2;
+  string startDate = 3;
+}
+
+message DepartmentPayloadProto {
   string name = 2;
   string startDate = 3;
 }
@@ -32,3 +42,4 @@ message DepartmentResponseProto {
   string startDate = 3;
   repeated DepartmentLocationPlainProto locationProtos = 4;
 }
+

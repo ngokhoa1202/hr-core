@@ -4,11 +4,15 @@ option java_multiple_files = true;
 option java_package = "org.gateway.service.authentication";
 option java_outer_classname = "AuthenticationProto";
 
+import "google/protobuf/empty.proto";
+
 
 package security;
 
 service AuthenticationGrpcService {
   rpc Login (UserLoginProto) returns (JwtProto) {}
+  rpc CreateUser (UserPayloadProto) returns (UserResponseProto) {}
+  rpc GetUser(UserIdProto) returns (UserResponseProto) {}
 }
 
 message UserLoginProto {
@@ -20,3 +24,32 @@ message JwtProto {
   string token = 1;
 }
 
+message UserPayloadProto {
+
+  message RolePlainProto {
+    int32 id = 1;
+    string name = 2;
+  }
+
+  string username = 1;
+  string password = 2;
+  string email = 3;
+  RolePlainProto rolePlainProto = 4;
+}
+
+message UserResponseProto {
+  message RolePlainProto {
+    int32 id = 1;
+    string name = 2;
+  }
+
+  string id = 1;
+  string username = 2;
+  string password = 3;
+  string email = 4;
+  RolePlainProto rolePlainProto = 5;
+}
+
+message UserIdProto {
+  string id = 1;
+}

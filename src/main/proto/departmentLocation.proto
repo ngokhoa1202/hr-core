@@ -4,9 +4,11 @@ option java_multiple_files = true;
 option java_package = "org.gateway.service.department.location";
 option java_outer_classname = "DepartmentLocationProto";
 
+import "google/protobuf/empty.proto";
+
 package department.location;
 
-service departmentLocationGrpcService {
+service DepartmentLocationGrpcService {
   rpc GetDepartmentLocationById(DepartmentLocationIdProto) returns (DepartmentLocationResponseProto) {}
 }
 
