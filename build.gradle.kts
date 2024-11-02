@@ -32,6 +32,9 @@ dependencies {
   implementation("${quarkusPluginId}:quarkus-hibernate-orm")
   implementation("${quarkusPluginId}:quarkus-hibernate-validator")
   implementation("${quarkusPluginId}:quarkus-grpc")
+  implementation("${quarkusPluginId}:quarkus-messaging-rabbitmq")
+  implementation("io.quarkus:quarkus-smallrye-reactive-messaging")
+  implementation("io.smallrye.reactive:smallrye-reactive-messaging-api")
 
 
   compileOnly("org.projectlombok:lombok:${lombokVersion}")
