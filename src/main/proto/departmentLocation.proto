@@ -14,7 +14,7 @@ message DepartmentLocationIdProto {
   int64 id = 1;
 }
 
-message DepartmentLocationPlainDto {
+message DepartmentLocationPlainProto {
   int64 id = 1;
   string location = 2;
 }

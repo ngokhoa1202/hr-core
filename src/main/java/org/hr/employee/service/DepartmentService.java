@@ -34,7 +34,7 @@ public interface DepartmentService {
   List<EmployeeDepartmentAssignmentStatisticsDto> getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInAscendingOrder(Long id, int limit)
     throws EntityNotFoundException;
 
-  DepartmentResponseDto createDepartment(@Valid DepartmentPayloadDto departmentDTO)
+  DepartmentResponseDto createDepartment(@Valid DepartmentPayloadDto departmentPayloadDto)
     throws ConstraintViolationException, EntityNotFoundException, JDBCException;
 
   DepartmentResponseDto updateDepartment(Long id, @Valid DepartmentPayloadDto departmentDTO)

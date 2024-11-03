@@ -1,5 +1,6 @@
 package org.hr.employee.dto.department.location;
 
+import org.gateway.service.department.DepartmentResponseProto;
 import org.hr.employee.dto.department.DepartmentMapper;
 import org.hr.employee.entity.DepartmentLocation;
 import org.mapstruct.Mapper;
@@ -15,7 +16,7 @@ import org.mapstruct.factory.Mappers;
     DepartmentMapper.class
   }
 )
-public interface  DepartmentLocationMapper {
+public interface DepartmentLocationMapper {
 
   DepartmentLocationMapper INSTANCE = Mappers.getMapper(DepartmentLocationMapper.class);
 
@@ -31,4 +32,10 @@ public interface  DepartmentLocationMapper {
   @Mapping(source = "id", target = "id")
   @Mapping(source = "location", target = "location")
   DepartmentLocationPlainDto locationToLocationPlainDto(DepartmentLocation location);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "location", target = "location")
+  DepartmentResponseProto.DepartmentLocationPlainProto departmentLocationPlainDtoToDepartmentLocationPlainProto(
+    DepartmentLocationPlainDto departmentLocationPlainDto
+  );
 }
