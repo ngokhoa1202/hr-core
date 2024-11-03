@@ -1,6 +1,5 @@
 package org.hr.employee.service;
 
-import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
