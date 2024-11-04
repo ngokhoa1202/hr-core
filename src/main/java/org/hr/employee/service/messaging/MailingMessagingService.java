@@ -22,7 +22,7 @@ public class MailingMessagingService {
     final UserPlainTextMailingDto userPlainTextMailingDto = this.createUserPlainTextMailingDto(assignmentResponseDto);
     final OutgoingRabbitMQMetadata metadata = new OutgoingRabbitMQMetadata.Builder()
       .withHeader("content_type", "application/json")
-      .withRoutingKey("urgent")
+      .withRoutingKey("user*")
       .withTimestamp(ZonedDateTime.now())
       .build();
     final Message<UserPlainTextMailingDto> message = Message.of(userPlainTextMailingDto, Metadata.of(metadata));

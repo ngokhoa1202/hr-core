@@ -6,7 +6,6 @@ option java_outer_classname = "AuthenticationProto";
 
 import "google/protobuf/empty.proto";
 
-
 package security;
 
 service AuthenticationGrpcService {
