@@ -29,7 +29,7 @@ public interface ProjectMapper {
 
   @Mapping(source = "name", target = "name")
   @Mapping(source = "area", target = "area")
-  @Mapping(source = "departmentPlainDto", target = "managedDepartment")
+  @Mapping(source = "departmentPlainDto", target = "departmentBelonging")
   Project projectPayloadDtoToProject(ProjectPayloadDto projectPayloadDto);
 
   @Mapping(source = "id", target = "id")

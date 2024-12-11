@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "employee")
+@Table(name = "employees")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -85,9 +85,10 @@ public class Employee {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "employee_uuid", unique = true, nullable = false)
   private UUID id;
 
-  @Column(name = "employee_id", unique = true)
+  @Column(name = "employee_id", unique = true, nullable = false)
   private String employeeId;
 
   @Column(name = "first_name", nullable = false)
@@ -126,7 +127,7 @@ public class Employee {
   private Integer salary;
 
   @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @JoinColumn(name = "deptid", referencedColumnName = "department_id")
+  @JoinColumn(name = "department_id", referencedColumnName = "department_id")
   private Department department;
 
   @OneToMany(mappedBy = "employeeAssigned", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

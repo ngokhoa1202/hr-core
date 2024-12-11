@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "departments")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -86,7 +87,7 @@ import java.util.Set;
       "COUNT(ass.id) AS numberOfAssignments " +
       "FROM Department AS dept " +
       "INNER JOIN dept.projects AS proj " +
-        "WITH proj.managedDepartment.id = :id " +
+        "WITH proj.departmentBelonging.id = :id " +
       "INNER JOIN dept.employees AS emp " +
       "INNER JOIN emp.assignments AS ass " +
       "GROUP BY dept.id, emp.id " +
@@ -102,7 +103,7 @@ import java.util.Set;
       "COUNT(ass.id) AS numberOfAssignments " +
       "FROM Department AS dept " +
       "INNER JOIN dept.projects AS proj " +
-      "WITH proj.managedDepartment.id = :id " +
+      "WITH proj.departmentBelonging.id = :id " +
       "INNER JOIN dept.employees AS emp " +
       "INNER JOIN emp.assignments AS ass " +
       "GROUP BY dept.id, emp.id " +
@@ -151,7 +152,7 @@ public class Department {
   @EqualsAndHashCode.Exclude
   private Set<DepartmentLocation> locations = new HashSet<>();
 
-  @OneToMany(mappedBy = "managedDepartment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "departmentBelonging", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @Builder.Default
   @EqualsAndHashCode.Exclude
   private Set<Project> projects = new HashSet<>();

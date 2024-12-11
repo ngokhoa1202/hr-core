@@ -84,5 +84,4 @@ public interface DepartmentMapper {
   @Mapping(source = "startDate", target = "startDate")
   DepartmentPayloadDto departmentPayloadProtoToDepartmentPayloadDto(DepartmentPayloadProto departmentPayloadProto);
 
-
 }

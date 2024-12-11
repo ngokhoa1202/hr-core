@@ -4,10 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hr.employee.dto.department.location.DepartmentLocationResponseDTO;
 
 @Entity
-@Table(name = "department_location")
+@Table(name = "department_locations")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,7 +29,7 @@ import org.hr.employee.dto.department.location.DepartmentLocationResponseDTO;
 public class DepartmentLocation {
 
   @Id
-  @Column(name = "id")
+  @Column(name = "location_id")
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private Long id;
 
@@ -43,8 +42,7 @@ public class DepartmentLocation {
     fetch = FetchType.EAGER,
     cascade = {CascadeType.MERGE, CascadeType.PERSIST}
   )
-  @JoinColumn(name = "deptid", referencedColumnName = "department_id")
+  @JoinColumn(name = "department_id", referencedColumnName = "department_id")
   private Department department;
-
 
 }

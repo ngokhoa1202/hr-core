@@ -32,3 +32,15 @@ message DepartmentResponseProto {
   string startDate = 3;
   repeated DepartmentLocationPlainProto locationProtos = 4;
 }
+
+message DepartmentPayloadProto {
+  message DepartmentLocationPlainProto {
+    int64 id = 1;
+    string location = 2;
+  }
+
+  string name = 1;
+  string startDate = 2;
+  repeated DepartmentLocationPlainProto locationProtos = 3;
+}
+
