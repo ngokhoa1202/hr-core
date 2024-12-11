@@ -1,5 +1,6 @@
 package org.hr.employee.service;
 
+import io.quarkus.logging.Log;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.hibernate.JDBCException;

@@ -20,7 +20,7 @@ CREATE SEQUENCE department_seq
     START 1
   INCREMENT 1
   MINVALUE 1
-  OWNED BY department.departmentid;
+  OWNED BY department.department_id;
 
 CREATE SEQUENCE department_location_seq
     START 1

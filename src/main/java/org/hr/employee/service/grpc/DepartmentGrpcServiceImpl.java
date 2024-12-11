@@ -65,4 +65,6 @@ public class DepartmentGrpcServiceImpl implements DepartmentGrpcService {
       .onFailure()
       .transform((throwable) -> this.exceptionConverter.convert((RuntimeException) throwable));
   }
+
+
 }

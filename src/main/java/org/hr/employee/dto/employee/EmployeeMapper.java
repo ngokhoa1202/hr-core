@@ -1,7 +1,6 @@
 package org.hr.employee.dto.employee;
 
 import jakarta.persistence.Tuple;
-import org.gateway.service.project.assignment.AssignmentPayloadProto;
 import org.hr.employee.dto.department.DepartmentMapper;
 import org.hr.employee.dto.department.DepartmentPlainDto;
 import org.hr.employee.entity.Employee;
@@ -81,13 +80,4 @@ public interface EmployeeMapper {
   @Mapping(expression = "java(tuple.get(\"numberOfAssignments\", Long.class))", target = "numberOfAssignments")
   EmployeeDepartmentAssignmentStatisticsDto tupleToEmployeeDepartmentAssignmentStatisticsDto(Tuple tuple);
 
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "employeeId", target = "employeeId")
-  @Mapping(source = "firstname", target = "firstname")
-  @Mapping(source = "lastname", target = "lastname")
-  @Mapping(source = "middlename", target = "middlename")
-  @Mapping(source = "gender", target = "gender", qualifiedByName = "toGenderEnum")
-  @Mapping(source = "salary", target = "salary")
-  @Mapping(source = "dateOfBirth", target = "dateOfBirth")
-  EmployeePlainDto employeePlainProtoToEmployeePlainDto(AssignmentPayloadProto.EmployeePlainProto employeePlainProto);
 }

@@ -1,7 +1,5 @@
 package org.hr.employee.dto.project.assignment;
 
-import org.gateway.service.project.assignment.AssignmentPayloadProto;
-import org.gateway.service.project.assignment.AssignmentResponseProto;
 import org.hr.employee.dto.employee.EmployeeMapper;
 import org.hr.employee.dto.project.ProjectMapper;
 import org.hr.employee.entity.Assignment;
@@ -35,15 +33,4 @@ public interface AssignmentMapper {
   @Mapping(source = "employeeAssigned", target = "employeePlainDto")
   @Mapping(source = "projectBelonging", target = "projectPlainDto")
   AssignmentResponseDto assignmentToAssignmentResponseDto(Assignment assignment);
-
-  @Mapping(source = "numberOfHours", target = "numberOfHours")
-  @Mapping(source = "employeePlainProto", target = "employeePlainDto")
-  @Mapping(source = "projectPlainProto", target = "projectPlainDto")
-  AssignmentPayloadDto assignmentPayloadProtoToAssignmentPayloadDto(AssignmentPayloadProto assignmentPayloadProto);
-
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "numberOfHours", target = "numberOfHours")
-  @Mapping(source = "employeePlainDto", target = "employeePlainProto")
-  @Mapping(source = "projectPlainDto", target = "projectPlainProto")
-  AssignmentResponseProto assignmentResponseDtoToAssignmentResponseProto(AssignmentResponseDto assignmentResponseDto);
 }

@@ -46,9 +46,9 @@ public class AssignmentServiceImpl implements AssignmentService {
     Employee employeeAssignedByDto = EmployeeMapper.INSTANCE.employeePlainDtoToEmployee(assignmentPayloadDto.employeePlainDto());
     EmployeeService.ensureEmployeeIntegrity(employeeAssignedById, employeeAssignedByDto);
 
-    Project projectBelongingById = this.projectDAO.findById(assignmentPayloadDto.projectPlainDto().id())
+    Project projectBelongingById = this.projectDAO.findById(assignmentPayloadDto.projectPlainDTO().id())
       .orElseThrow(() -> new EntityNotFoundException("id", Project.class.getSimpleName()));
-    Project projectBelongingByDto = ProjectMapper.INSTANCE.projectPlainDtoToProject(assignmentPayloadDto.projectPlainDto());
+    Project projectBelongingByDto = ProjectMapper.INSTANCE.projectPlainDtoToProject(assignmentPayloadDto.projectPlainDTO());
     ProjectService.ensureProjectIntegrity(projectBelongingById, projectBelongingByDto);
 
     Assignment assignment = AssignmentMapper.INSTANCE.assignmentPayloadDtoToAssignment(assignmentPayloadDto);
@@ -74,9 +74,9 @@ public class AssignmentServiceImpl implements AssignmentService {
     Employee newEmployeeByDto = EmployeeMapper.INSTANCE.employeePlainDtoToEmployee(assignmentPayloadDto.employeePlainDto());
     EmployeeService.ensureEmployeeIntegrity(newEmployeeById, newEmployeeByDto);
 
-    Project newProjectById = this.projectDAO.findById(assignmentPayloadDto.projectPlainDto().id())
+    Project newProjectById = this.projectDAO.findById(assignmentPayloadDto.projectPlainDTO().id())
       .orElseThrow(() -> new EntityNotFoundException("id", Project.class.getSimpleName()));
-    Project newProjectByDto = ProjectMapper.INSTANCE.projectPlainDtoToProject(assignmentPayloadDto.projectPlainDto());
+    Project newProjectByDto = ProjectMapper.INSTANCE.projectPlainDtoToProject(assignmentPayloadDto.projectPlainDTO());
     ProjectService.ensureProjectIntegrity(newProjectById, newProjectByDto);
 
     assignment.setNumberOfHours(assignmentPayloadDto.numberOfHours());

@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "project")
+@Table(name = "projects")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,15 +35,17 @@ public class Project {
   )
   private String name;
 
+  private String description;
+
   @ManyToOne(
     fetch = FetchType.EAGER,
     cascade = {CascadeType.PERSIST, CascadeType.REMOVE}
   )
   @JoinColumn(
-    name = "managed_department_id",
+    name = "department_id",
     referencedColumnName = "department_id"
   )
-  private Department managedDepartment;
+  private Department departmentBelonging;
 
   @OneToMany(
     mappedBy = "projectBelonging",

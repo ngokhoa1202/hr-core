@@ -51,10 +51,10 @@ public class ProjectServiceImpl implements ProjectService {
     Project project = ProjectMapper.INSTANCE.projectPayloadDtoToProject(projectPayloadDto);
     Department departmentById = this.departmentDao.findById(projectPayloadDto.departmentPlainDto().id())
       .orElseThrow(() -> new EntityNotFoundException("id", Department.class.getSimpleName()));
-    Department departmentByDto = project.getManagedDepartment();
+    Department departmentByDto = project.getDepartmentBelonging();
     DepartmentService.ensureDepartmentIntegrity(departmentById, departmentByDto);
 
-    project.setManagedDepartment(departmentById);
+    project.setDepartmentBelonging(departmentById);
     departmentById.getProjects().add(project);
 
     Project projectCreated =  this.projectDao.create(project)
@@ -77,8 +77,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     project.setName(projectCreationDTO.name());
     project.setArea(projectCreationDTO.area());
-    project.setManagedDepartment(newDepartmentById);
-    Department oldDepartment = project.getManagedDepartment();
+    project.setDepartmentBelonging(newDepartmentById);
+    Department oldDepartment = project.getDepartmentBelonging();
     oldDepartment.getProjects().remove(project);
     newDepartmentById.getProjects().add(project);
 
