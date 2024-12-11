@@ -1,29 +1,58 @@
 package org.hr.employee.service;
 
+import io.quarkus.logging.Log;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import org.hibernate.JDBCException;
-import org.hr.employee.dto.DepartmentCreationDTO;
-import org.hr.employee.dto.DepartmentDTO;
-import org.hr.employee.dto.DepartmentLocationCreationDTO;
-import org.hr.employee.dto.DepartmentLocationDTO;
+import org.hr.employee.dto.*;
+import org.hr.employee.dto.department.DepartmentEmployeeStatisticsDto;
+import org.hr.employee.dto.department.DepartmentPayloadDto;
+import org.hr.employee.dto.department.DepartmentResponseDto;
+import org.hr.employee.dto.employee.EmployeeDepartmentAssignmentStatisticsDto;
+import org.hr.employee.dto.employee.EmployeeResponseDto;
+import org.hr.employee.entity.Department;
 import org.hr.exception.EntityNotFoundException;
+import org.hr.exception.InvalidRequestBodyException;
+
+import java.util.List;
 
 public interface DepartmentService {
-  DepartmentDTO getDepartment(Long id) throws EntityNotFoundException;
+  DepartmentResponseDto getDepartment(Long id) throws EntityNotFoundException;
 
-  DepartmentDTO saveDepartment(DepartmentCreationDTO departmentDTO)
+  List<DepartmentResponseDto> getDepartments();
+
+  DepartmentEmployeeStatisticsDto getDepartmentWithEmployeeStatistics(Long id) throws EntityNotFoundException;
+
+  TotalNumberDTO getTotalNumberOfDepartments();
+
+  List<EmployeeResponseDto> getEmployeesWithSalaryGreaterOrEqualToGivenSalaryWithinDepartment(Long id, int salary, int limit)
+    throws EntityNotFoundException;
+
+  List<EmployeeDepartmentAssignmentStatisticsDto> getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInDescendingOrder(Long id, int limit)
+    throws EntityNotFoundException;
+
+  List<EmployeeDepartmentAssignmentStatisticsDto> getEmployeesWithLowestHoursSpentPerAssignmentWithinDepartmentInAscendingOrder(Long id, int limit)
+    throws EntityNotFoundException;
+
+  DepartmentResponseDto createDepartment(@Valid DepartmentPayloadDto departmentPayloadDto)
     throws ConstraintViolationException, EntityNotFoundException, JDBCException;
 
-  DepartmentDTO updateDepartment(Long id, DepartmentCreationDTO departmentDTO)
+  DepartmentResponseDto updateDepartment(Long id, @Valid DepartmentPayloadDto departmentDTO)
     throws JDBCException, EntityNotFoundException;
 
   void deleteDepartment(Long id) throws EntityNotFoundException;
 
-  DepartmentLocationDTO getDepartmentLocation(Long id);
+  static void ensureDepartmentIntegrity(Department persistentDepartment, Department detachedDepartment)
+    throws InvalidRequestBodyException {
 
-  DepartmentLocationDTO saveDepartmentLocation(DepartmentLocationCreationDTO dto);
 
-  DepartmentLocationDTO updatedDepartmentLocation(Long id, DepartmentLocationCreationDTO dto);
+    if (! persistentDepartment.getName().equals(detachedDepartment.getName())) {
+      throw new InvalidRequestBodyException("name", Department.class.getSimpleName());
+    }
 
-  void deleteDepartmentLocation(Long id) throws EntityNotFoundException;
+    if (! persistentDepartment.getStartDate().toLocalDate().isEqual(detachedDepartment.getStartDate().toLocalDate())) {
+      throw new InvalidRequestBodyException("start_date", Department.class.getSimpleName());
+    }
+  }
 }
+

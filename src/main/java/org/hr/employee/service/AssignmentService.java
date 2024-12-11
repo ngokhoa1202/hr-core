@@ -1,11 +1,22 @@
 package org.hr.employee.service;
 
-import org.hr.employee.dto.AssignmentCreationDTO;
-import org.hr.employee.dto.AssignmentDTO;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import org.hibernate.JDBCException;
+import org.hr.employee.dto.project.assignment.AssignmentPayloadDto;
+import org.hr.employee.dto.project.assignment.AssignmentResponseDto;
+import org.hr.exception.EntityNotFoundException;
+import org.hr.exception.InvalidRequestBodyException;
 
 public interface AssignmentService {
-  AssignmentDTO getAssignment(Long id) ;
-  AssignmentDTO createAssignment(AssignmentCreationDTO assignmentCreationDTO);
-  AssignmentDTO updateAssignment(Long id, AssignmentCreationDTO assignmentCreationDTO);
-  void deleteAssignment(Long id);
+
+  AssignmentResponseDto getAssignment(Long id) throws EntityNotFoundException;
+
+  AssignmentResponseDto createAssignment(@Valid AssignmentPayloadDto assignmentCreationDTO)
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException;
+
+  AssignmentResponseDto updateAssignment(Long id, @Valid AssignmentPayloadDto assignmentCreationDTO)
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException;
+
+  void deleteAssignment(Long id) throws EntityNotFoundException;
 }

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.gateway.service.authentication";
+option java_outer_classname = "AuthenticationProto";
+
+
+package security;
+
+service AuthenticationGrpcService {
+  rpc Login (UserLoginProto) returns (JwtProto) {}
+}
+
+message UserLoginProto {
+  string username = 1;
+  string password = 2;
+}
+
+message JwtProto {
+  string token = 1;
+}
+

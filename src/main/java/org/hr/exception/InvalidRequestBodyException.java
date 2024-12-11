@@ -1,15 +1,30 @@
 package org.hr.exception;
 
-import jakarta.ws.rs.core.Response;
-import org.hr.exception.mapper.HumanResourceException;
+import java.time.LocalDateTime;
 
-public class InvalidRequestBodyException extends HumanResourceException {
+public final class InvalidRequestBodyException extends HumanResourceException {
 
   public InvalidRequestBodyException() {
-    super("The request body is invalid", Response.Status.BAD_REQUEST);
+    super(
+      "undefined",
+      "The request body is invalid",
+      LocalDateTime.now()
+    );
   }
 
   public InvalidRequestBodyException(String message) {
-    super(message, Response.Status.BAD_REQUEST);
+    super(
+      "undefined",
+      message,
+      LocalDateTime.now()
+    );
+  }
+
+  public InvalidRequestBodyException(String fieldName, String entityName) {
+    super(
+      fieldName,
+      String.format("The %s with %s is invalid", entityName, fieldName),
+      LocalDateTime.now()
+    );
   }
 }

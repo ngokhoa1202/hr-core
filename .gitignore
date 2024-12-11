@@ -38,5 +38,8 @@ nb-configuration.xml
 # Plugin directory
 /.quarkus/cli/plugins/
 
-# Git token
-token.txt
+# Build - run scripts
+build-native.sh
+clean.sh
+run-native.sh
+run.sh

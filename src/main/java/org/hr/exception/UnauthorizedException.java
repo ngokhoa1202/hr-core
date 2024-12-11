@@ -1,11 +1,14 @@
 package org.hr.exception;
 
-import jakarta.ws.rs.core.Response;
-import org.hr.exception.mapper.HumanResourceException;
+import java.time.LocalDateTime;
 
-public class UnauthorizedException extends HumanResourceException {
+public final class UnauthorizedException extends HumanResourceException {
 
-  public UnauthorizedException() {
-    super("The provided information is unauthorized", Response.Status.UNAUTHORIZED);
+  public UnauthorizedException(String fieldName) {
+    super(
+      fieldName,
+      String.format("The %s is unauthorized", fieldName),
+      LocalDateTime.now()
+    );
   }
 }

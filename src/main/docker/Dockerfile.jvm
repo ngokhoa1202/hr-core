@@ -3,15 +3,16 @@
 #
 # Before building the container image run:
 #
-# ./gradlew build
+# ./gradlew build -x test
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.jvm -t quarkus/human-resource-jvm .
+#docker build -f src/main/docker/Dockerfile.jvm -t human-resource-jvm .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/human-resource-jvm
+#docker run -i --rm -p 7272:7272 --network=host --restart unless-stopped -v hr-logs:$(pwd)/human-resource-jvm -e \
+# TZ=Asia/Ho_Chi_Minh
 #
 # If you want to include the debug port into your docker image
 # you will have to expose the debug port (default 5005 being the default) like this :  EXPOSE 8080 5005.
@@ -88,7 +89,7 @@ COPY --chown=185 build/quarkus-app/*.jar /deployments/
 COPY --chown=185 build/quarkus-app/app/ /deployments/app/
 COPY --chown=185 build/quarkus-app/quarkus/ /deployments/quarkus/
 
-EXPOSE 8080
+EXPOSE 7272
 USER 185
 ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"

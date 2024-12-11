@@ -1,14 +1,19 @@
 package org.hr.employee.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import lombok.NonNull;
-import org.hr.employee.dao.AssignmentDAO;
-import org.hr.employee.dao.EmployeeDAO;
-import org.hr.employee.dao.ProjectDAO;
-import org.hr.employee.dto.AssignmentCreationDTO;
-import org.hr.employee.dto.AssignmentDTO;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.JDBCException;
+import org.hr.employee.dao.AssignmentDao;
+import org.hr.employee.dao.EmployeeDao;
+import org.hr.employee.dao.ProjectDao;
+import org.hr.employee.dto.employee.EmployeeMapper;
+import org.hr.employee.dto.project.ProjectMapper;
+import org.hr.employee.dto.project.assignment.AssignmentMapper;
+import org.hr.employee.dto.project.assignment.AssignmentPayloadDto;
+import org.hr.employee.dto.project.assignment.AssignmentResponseDto;
 import org.hr.employee.entity.Assignment;
 import org.hr.employee.entity.Employee;
 import org.hr.employee.entity.Project;
@@ -16,68 +21,80 @@ import org.hr.exception.EntityNotFoundException;
 import org.hr.exception.InvalidRequestBodyException;
 
 @ApplicationScoped
+@RequiredArgsConstructor
+@Transactional
 public class AssignmentServiceImpl implements AssignmentService {
 
-  private final EmployeeDAO employeeDAO;
-  private final AssignmentDAO assignmentDAO;
-  private final ProjectDAO projectDAO;
+  private final EmployeeDao employeeDAO;
+  private final AssignmentDao assignmentDAO;
+  private final ProjectDao projectDAO;
 
-  @Inject
-  public AssignmentServiceImpl(
-    @NonNull final AssignmentDAO assignmentDAO, @NonNull final EmployeeDAO employeeDAO,
-    @NonNull final ProjectDAO projectDAO) {
 
-    this.assignmentDAO = assignmentDAO;
-    this.employeeDAO = employeeDAO;
-    this.projectDAO = projectDAO;
+  @Override
+  public AssignmentResponseDto getAssignment(Long id) throws EntityNotFoundException {
+    Assignment assignment = this.assignmentDAO.findById(id)
+      .orElseThrow(() -> new EntityNotFoundException("id", Assignment.class.getName()));
+    return AssignmentMapper.INSTANCE.assignmentToAssignmentResponseDto(assignment);
   }
 
   @Override
-  public AssignmentDTO getAssignment(Long id) {
-    return this.assignmentDAO.findAssignmentById(id)
-      .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getName()))
-      .toAssignmentDTO();
+  public AssignmentResponseDto createAssignment(@Valid AssignmentPayloadDto assignmentPayloadDto)
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
+
+    Employee employeeAssignedById = this.employeeDAO.findById(assignmentPayloadDto.employeePlainDto().id())
+      .orElseThrow(() -> new EntityNotFoundException("id", Employee.class.getSimpleName()));
+    Employee employeeAssignedByDto = EmployeeMapper.INSTANCE.employeePlainDtoToEmployee(assignmentPayloadDto.employeePlainDto());
+    EmployeeService.ensureEmployeeIntegrity(employeeAssignedById, employeeAssignedByDto);
+
+    Project projectBelongingById = this.projectDAO.findById(assignmentPayloadDto.projectPlainDTO().id())
+      .orElseThrow(() -> new EntityNotFoundException("id", Project.class.getSimpleName()));
+    Project projectBelongingByDto = ProjectMapper.INSTANCE.projectPlainDtoToProject(assignmentPayloadDto.projectPlainDTO());
+    ProjectService.ensureProjectIntegrity(projectBelongingById, projectBelongingByDto);
+
+    Assignment assignment = AssignmentMapper.INSTANCE.assignmentPayloadDtoToAssignment(assignmentPayloadDto);
+    assignment.setEmployeeAssigned(employeeAssignedById);
+    assignment.setProjectBelonging(projectBelongingById);
+    employeeAssignedById.getAssignments().add(assignment);
+    projectBelongingById.getAssignments().add(assignment);
+
+    Assignment assignmentCreated = this.assignmentDAO.create(assignment)
+      .orElseThrow(InvalidRequestBodyException::new);
+    return AssignmentMapper.INSTANCE.assignmentToAssignmentResponseDto(assignmentCreated);
   }
 
   @Override
-  @Transactional(value = Transactional.TxType.REQUIRED)
-  public AssignmentDTO createAssignment(AssignmentCreationDTO assignmentCreationDTO) {
+  public AssignmentResponseDto updateAssignment(Long id, @Valid AssignmentPayloadDto assignmentPayloadDto)
+    throws EntityNotFoundException, ConstraintViolationException, JDBCException, InvalidRequestBodyException {
 
-    Employee employeeAssigned = this.employeeDAO.findEmployeeById(assignmentCreationDTO.getEmployeeId())
-      .orElseThrow(() -> new EntityNotFoundException(Employee.class.getSimpleName()));
-    Project projectBelonging = this.projectDAO.findProjectById(assignmentCreationDTO.getProjectId())
-      .orElseThrow(() -> new EntityNotFoundException(Project.class.getSimpleName()));
+    Assignment assignment = this.assignmentDAO.findById(id)
+      .orElseThrow(() -> new EntityNotFoundException("id", Assignment.class.getSimpleName()));
 
-    return this.assignmentDAO.saveAssignment(
-      assignmentCreationDTO.toAssignment()
-        .setEmployeeAssigned(employeeAssigned)
-        .setProjectBelonging(projectBelonging)
-    ).orElseThrow(InvalidRequestBodyException::new).toAssignmentDTO();
+    Employee newEmployeeById = this.employeeDAO.findById(assignmentPayloadDto.employeePlainDto().id())
+      .orElseThrow(() -> new EntityNotFoundException("id", Employee.class.getSimpleName()));
+    Employee newEmployeeByDto = EmployeeMapper.INSTANCE.employeePlainDtoToEmployee(assignmentPayloadDto.employeePlainDto());
+    EmployeeService.ensureEmployeeIntegrity(newEmployeeById, newEmployeeByDto);
+
+    Project newProjectById = this.projectDAO.findById(assignmentPayloadDto.projectPlainDTO().id())
+      .orElseThrow(() -> new EntityNotFoundException("id", Project.class.getSimpleName()));
+    Project newProjectByDto = ProjectMapper.INSTANCE.projectPlainDtoToProject(assignmentPayloadDto.projectPlainDTO());
+    ProjectService.ensureProjectIntegrity(newProjectById, newProjectByDto);
+
+    assignment.setNumberOfHours(assignmentPayloadDto.numberOfHours());
+    assignment.setEmployeeAssigned(newEmployeeById);
+    assignment.setProjectBelonging(newProjectById);
+
+    Employee oldEmployee = assignment.getEmployeeAssigned();
+    oldEmployee.getAssignments().remove(assignment);
+    Project oldProject = assignment.getProjectBelonging();
+    oldProject.getAssignments().remove(assignment);
+
+    Assignment assignmentUpdated = this.assignmentDAO.update(assignment)
+      .orElseThrow(InvalidRequestBodyException::new);
+    return AssignmentMapper.INSTANCE.assignmentToAssignmentResponseDto(assignmentUpdated);
   }
 
   @Override
-  @Transactional
-  public AssignmentDTO updateAssignment(Long id, AssignmentCreationDTO assignmentCreationDTO) {
-    Assignment existedAssignment = this.assignmentDAO.findAssignmentById(id)
-      .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getSimpleName()));
-
-    Employee employeeAssigned = this.employeeDAO.findEmployeeById(assignmentCreationDTO.getEmployeeId())
-      .orElseThrow(() -> new EntityNotFoundException(Employee.class.getSimpleName()));
-    Project projectBelonging = this.projectDAO.findProjectById(assignmentCreationDTO.getProjectId())
-      .orElseThrow(() -> new EntityNotFoundException(Project.class.getSimpleName()));
-    return this.assignmentDAO.updateAssignment(
-      assignmentCreationDTO.toAssignment()
-        .setId(id)
-        .setEmployeeAssigned(employeeAssigned)
-        .setProjectBelonging(projectBelonging)
-    ).orElseThrow(InvalidRequestBodyException::new).toAssignmentDTO();
-  }
-
-  @Override
-  @Transactional(value = Transactional.TxType.REQUIRED)
   public void deleteAssignment(Long id) throws EntityNotFoundException {
-    this.assignmentDAO.deleteAssignment(id)
-      .filter((rowsDeleted) -> rowsDeleted == 1)
-      .orElseThrow(() -> new EntityNotFoundException(Assignment.class.getSimpleName()))
+    this.assignmentDAO.deleteById(id);
   }
 }
