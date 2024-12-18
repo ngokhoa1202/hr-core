@@ -32,7 +32,7 @@ dependencies {
   implementation("${quarkusPluginId}:quarkus-hibernate-orm")
   implementation("${quarkusPluginId}:quarkus-hibernate-validator")
   implementation("${quarkusPluginId}:quarkus-grpc")
-
+  implementation("${quarkusPluginId}:quarkus-messaging-rabbitmq")
 
   compileOnly("org.projectlombok:lombok:${lombokVersion}")
   annotationProcessor("org.projectlombok:lombok:${lombokVersion}")

@@ -1,9 +1,6 @@
 package org.hr.employee.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import org.hr.employee.dto.department.DepartmentPlainDto;
 import org.hr.employee.entity.GenderEnum;
 

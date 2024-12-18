@@ -29,7 +29,7 @@ public class DepartmentGrpcServiceImpl implements DepartmentGrpcService {
       .onFailure().transform((throwable) -> this.exceptionConverter.convert((RuntimeException) throwable));
   }
 
-  @Override
+//  @Override
   public Uni<DepartmentResponseProto> createDepartment(DepartmentPayloadProto departmentPayloadProto) throws StatusRuntimeException {
     return Uni.createFrom().item(departmentPayloadProto)
       .onItem().transform(DepartmentMapper.INSTANCE::departmentPayloadProtoToDepartmentPayloadDto)
@@ -39,7 +39,7 @@ public class DepartmentGrpcServiceImpl implements DepartmentGrpcService {
       .onFailure().transform((throwable) -> this.exceptionConverter.convert((RuntimeException) throwable));
   }
 
-  @Override
+//  @Override
   public Uni<DepartmentResponseProto> updateDepartment(DepartmentPlainProto departmentPlainProto) {
 
     return Uni.createFrom().item(departmentPlainProto)
@@ -54,7 +54,7 @@ public class DepartmentGrpcServiceImpl implements DepartmentGrpcService {
       .onFailure().transform((throwable) -> this.exceptionConverter.convert((RuntimeException) throwable));
   }
 
-  @Override
+//  @Override
   public Uni<Empty> deleteDepartment(DepartmentIdProto departmentIdProto) {
     return Uni.createFrom().item(departmentIdProto)
       .onItem().invoke((proto) -> {
